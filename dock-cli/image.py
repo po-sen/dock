@@ -10,7 +10,7 @@ def cli(obj):
 
     This is a command line interface for manage images
     """
-    obj.helper = hlp.ImageHelper(obj.config, obj.config_file)
+    obj.helper = hlp.ImageHelper(obj.config, obj.config_file, obj.command)
 
 @cli.command(name='list',
              help='List all images')
@@ -22,19 +22,19 @@ def image_list(obj):
 @cli.command(name='diff',
              help='List all images that have been changed between commits')
 @click.pass_obj
-@click.argument('commit1', nargs=1, required=False, type=str, default='HEAD')
-@click.argument('commit2', nargs=1, required=False, type=str)
+@click.argument('commit1', required=False, type=str, default='HEAD')
+@click.argument('commit2', required=False, type=str)
 def image_diff(obj, commit1, commit2):
-    for section in obj.helper.get_updated_images(obj.git, commit1, commit2):
+    for section in obj.helper.get_updated_images(commit1, commit2):
         click.echo(section)
 
 @cli.command(name='show',
              help='Show detailed information about a specific image')
 @click.pass_obj
 @click.argument('section', required=True, type=str)
-@click.argument('tag', required=False, nargs=1, type=str, default='latest')
+@click.argument('tag', required=False, type=str, default='latest')
 def image_show(obj, section, tag):
-    click.echo(obj.helper.get_image_name(section, tag))
+    click.echo(obj.helper.get_image(section, tag))
 
 @cli.command(name='build',
              help='Build images')
@@ -43,9 +43,9 @@ def image_show(obj, section, tag):
 @click.option('--tag', 'tags', multiple=True, type=str, default=['latest'])
 def image_build(obj, sections, tags):
     for section in sections:
-        cmd.run([obj.docker, 'build', obj.helper.get_section_path(section),
+        cmd.run([obj.command.docker, 'build', obj.helper.get_section_path(section),
                  '--file', obj.helper.get_section_file(section),
-                 *itertools.chain(*[('--tag', obj.helper.get_image_name(section, tag)) for tag in tags])])
+                 *itertools.chain(*[('--tag', obj.helper.get_image(section, tag)) for tag in tags])])
 
 @cli.command(name='push',
              help='Push images')
@@ -55,7 +55,7 @@ def image_build(obj, sections, tags):
 def image_push(obj, sections, tags):
     for section in sections:
         for tag in tags:
-            cmd.run([obj.docker, 'push', obj.helper.get_image_name(section, tag)])
+            cmd.run([obj.command.docker, 'push', obj.helper.get_image(section, tag)])
 
 @cli.command(name='clean',
              help='Clean images')
@@ -65,4 +65,4 @@ def image_push(obj, sections, tags):
 def image_clean(obj, sections, tags):
     for section in sections:
         for tag in tags:
-            cmd.run([obj.docker, 'rmi', '--force', obj.helper.get_image_name(section, tag)])
+            cmd.run([obj.command.docker, 'rmi', '--force', obj.helper.get_image(section, tag)])

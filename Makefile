@@ -34,7 +34,7 @@ list: init
 	$(VENV)/bin/pip list;
 
 PHONY += test
-test: init test/.pylintrc test/requirements.txt
+test: init .pylintrc test/requirements.txt
 	@set -euo pipefail; \
 	$(VENV)/bin/pip install -Uqr test/requirements.txt; \
 	$(VENV)/bin/pip list; \
