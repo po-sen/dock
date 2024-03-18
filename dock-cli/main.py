@@ -3,15 +3,15 @@ import logging
 import types
 import click
 import utils.helpers as hlp
-from chart import cli as chart
-from image import cli as image
+from cli.chart import cli as chart_cli
+from cli.image import cli as image_cli
 
 CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],
     'auto_envvar_prefix': 'DOCK',
 }
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=CONTEXT_SETTINGS, cls=hlp.OrderedGroup)
 @click.pass_context
 @click.option('--docker',
               type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
@@ -40,28 +40,20 @@ def cli(ctx, docker, helm, git, config_file, log_level):
                         format='%(asctime)s - %(levelname)s - %(name)s - "%(message)s"')
 
     ctx.obj = ctx.ensure_object(types.SimpleNamespace)
-    commands = [('docker', docker),
-                ('helm', helm),
-                ('git', git)]
-    ctx.obj.command = hlp.Command(**{k: v for k, v in commands if v is not None})
-    ctx.obj.config_file = config_file
+
+    command = hlp.Command()
+    command.docker = command.docker if docker is None else docker
+    command.helm = command.helm if helm is None else helm
+    command.git = command.git if git is None else git
+    ctx.obj.command = command
 
     logging.getLogger(__name__).debug('Reading configuration from %s', config_file)
     ctx.obj.config = configparser.ConfigParser()
     ctx.obj.config.read(config_file)
+    ctx.obj.config_file = config_file
 
-    @ctx.call_on_close
-    def update_config():
-        logging.getLogger(__name__).debug('Updating configuration to %s', config_file)
-        with open(config_file, 'w', encoding='utf-8') as fp:
-            ctx.obj.config.write(fp)
-
-@cli.command(name='ping')
-def ping():
-    click.echo('pong')
-
-cli.add_command(chart)
-cli.add_command(image)
+cli.add_command(chart_cli)
+cli.add_command(image_cli)
 
 if __name__ == '__main__':
     cli()

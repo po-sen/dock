@@ -1,17 +1,26 @@
 import enum
 
-class Chart(enum.Enum):
-    REGISTRY = 'oci registry'
-    FILE = 'file'
+@enum.unique
+class ChartConfigOptions(str, enum.Enum):
+    REGISTRY = 'oci-registry'
+    FILE = 'chart-file'
     TYPE = 'type'
+    def __str__(self):
+        return self.value
 
-class Image(enum.Enum):
+@enum.unique
+class ImageConfigOptions(str, enum.Enum):
     REGISTRY = 'registry'
-    FILE = 'file'
-    NAME = 'name'
+    FILE = 'image-file'
+    NAME = 'image-name'
     TYPE = 'type'
-    DEPENDS_ON = 'depends on'
+    DEPENDS_ON = 'depends-on'
+    def __str__(self):
+        return self.value
 
-class SessionType(enum.Enum):
+@enum.unique
+class SessionType(str, enum.Enum):
     CHART = 'chart'
     IMAGE = 'image'
+    def __str__(self):
+        return self.value

@@ -1,15 +1,21 @@
+import dataclasses
 import pathlib
 import re
-from dataclasses import dataclass
+import click
 from utils import commands as cmd
-from utils.schema import Chart, Image, SessionType
+from utils.schema import ChartConfigOptions as Chart, ImageConfigOptions as Image, SessionType
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass()
 class Command():
     docker: str = 'docker'
     helm: str = 'helm'
     git: str = 'git'
+
+
+class OrderedGroup(click.Group):
+    def list_commands(self, _ctx):
+        return self.commands
 
 
 class ConfigHelper():
