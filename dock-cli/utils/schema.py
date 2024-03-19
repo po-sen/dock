@@ -13,8 +13,8 @@ class ImageConfigOptions(str, enum.Enum):
     REGISTRY = 'registry'
     FILE = 'image-file'
     NAME = 'image-name'
-    TYPE = 'type'
     DEPENDS_ON = 'depends-on'
+    TYPE = 'type'
     def __str__(self):
         return self.value
 

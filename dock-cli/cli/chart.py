@@ -4,7 +4,7 @@ import utils.callback as cb
 import utils.commands as cmd
 import utils.helpers as hlp
 from utils.schema import ChartConfigOptions as Chart, SectionType
-from utils.utils import update_config, set_config_option
+from utils.utils import update_config, set_config_option, print_dock_config
 
 @click.group(name='chart', cls=hlp.OrderedGroup)
 @click.pass_obj
@@ -58,32 +58,42 @@ def chart_push(obj, sections, destination):
     for section in sections:
         cmd.run([obj.command.helm, 'push', obj.helper.get_chart_archive_file(section, destination)])
 
-@cli.group(name='config', cls=hlp.OrderedGroup)
-def config_cli():
+@cli.group(name='config', invoke_without_command=True, cls=hlp.OrderedGroup)
+@click.pass_context
+def config_cli(ctx):
     """Manage charts' configuration
 
     This is a command line interface for manage charts' configuration
     """
+    if ctx.invoked_subcommand is None:
+        for section in ctx.obj.helper.get_charts():
+            print_dock_config(section, Chart)
+        ctx.call_on_close(update_config)
 
-@config_cli.command(name='init')
+@config_cli.command(name='init',
+                    help='Initialize chart default settings in the configuration')
 @click.pass_context
 @click.option('--registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
 @click.option('--file', required=False, type=str, default='Chart.yaml')
 def config_init(ctx, registry, file):
     set_config_option(configparser.DEFAULTSECT, Chart.REGISTRY, registry)
     set_config_option(configparser.DEFAULTSECT, Chart.FILE, file)
+    for section in ctx.obj.helper.get_charts():
+        print_dock_config(section, Chart)
     ctx.call_on_close(update_config)
 
-@config_cli.command(name='add')
+@config_cli.command(name='set',
+                    help='Add or update an chart section in the configuration')
 @click.pass_context
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False), callback=cb.section_name)
 @click.option('--registry', required=False, type=str)
 @click.option('--file', required=False, type=str)
-def config_add(ctx, section, registry, file):
+def config_set(ctx, section, registry, file):
     if ctx.obj.config.has_section(section) is False:
         ctx.obj.config.add_section(section)
     set_config_option(section, Chart.REGISTRY, registry)
     set_config_option(section, Chart.FILE, file)
     set_config_option(section, Chart.TYPE, SectionType.CHART)
     ctx.obj.helper.validate_section(section)
+    print_dock_config(section, Chart)
     ctx.call_on_close(update_config)

@@ -15,6 +15,13 @@ def set_config_option(obj, section, option, value=None):
         logging.getLogger(__name__).debug('Setting section [%s] option `%s` to `%s`', section, option, value)
         obj.config.set(section, option, value)
 
+@click.pass_obj
+def print_dock_config(obj, section, schema):
+    click.echo(f"{click.style(section, fg='bright_cyan')}:")
+    for option in schema:
+        value = ' '.join(obj.config.get(section, option, fallback='').strip().splitlines())
+        click.echo(f"- {click.style(option, fg='green')}: {click.style(value, fg='yellow')}")
+
 def topological_sort(dependencies):
     visited = set()
     result = []

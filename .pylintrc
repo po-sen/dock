@@ -7,6 +7,7 @@ signature-mutators=click.decorators.option,
                    click.decorators.version_option,
                    click.decorators.help_option,
                    click.decorators.pass_context,
+                   click.decorators.pass_obj,
                    click.decorators.confirmation_option
 
 [FORMAT]
