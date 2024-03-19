@@ -19,7 +19,7 @@ class ImageConfigOptions(str, enum.Enum):
         return self.value
 
 @enum.unique
-class SessionType(str, enum.Enum):
+class SectionType(str, enum.Enum):
     CHART = 'chart'
     IMAGE = 'image'
     def __str__(self):

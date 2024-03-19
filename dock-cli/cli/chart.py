@@ -3,7 +3,7 @@ import click
 import utils.callback as cb
 import utils.commands as cmd
 import utils.helpers as hlp
-from utils.schema import ChartConfigOptions as Chart, SessionType
+from utils.schema import ChartConfigOptions as Chart, SectionType
 from utils.utils import update_config, set_config_option
 
 @click.group(name='chart', cls=hlp.OrderedGroup)
@@ -58,7 +58,7 @@ def chart_push(obj, sections, destination):
     for section in sections:
         cmd.run([obj.command.helm, 'push', obj.helper.get_chart_archive_file(section, destination)])
 
-@cli.group(name='config')
+@cli.group(name='config', cls=hlp.OrderedGroup)
 def config_cli():
     """Manage charts' configuration
 
@@ -84,6 +84,6 @@ def config_add(ctx, section, registry, file):
         ctx.obj.config.add_section(section)
     set_config_option(section, Chart.REGISTRY, registry)
     set_config_option(section, Chart.FILE, file)
-    set_config_option(section, Chart.TYPE, SessionType.CHART)
+    set_config_option(section, Chart.TYPE, SectionType.CHART)
     ctx.obj.helper.validate_section(section)
     ctx.call_on_close(update_config)

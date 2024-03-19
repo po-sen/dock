@@ -4,7 +4,7 @@ import click
 import utils.callback as cb
 import utils.commands as cmd
 import utils.helpers as hlp
-from utils.schema import ImageConfigOptions as Image, SessionType
+from utils.schema import ImageConfigOptions as Image, SectionType
 from utils.utils import update_config, set_config_option
 
 @click.group(name='image', cls=hlp.OrderedGroup)
@@ -74,7 +74,7 @@ def image_clean(obj, sections, tags):
         for tag in tags:
             cmd.run([obj.command.docker, 'rmi', '--force', obj.helper.get_image(section, tag)])
 
-@cli.group(name='config')
+@cli.group(name='config', cls=hlp.OrderedGroup)
 def config_cli():
     """Manage images' configuration
 
@@ -96,7 +96,8 @@ def config_init(ctx, registry, file):
 @click.option('--registry', required=False, type=str)
 @click.option('--file', required=False, type=str)
 @click.option('--name', required=False, type=str)
-@click.option('--depends-on', required=False, multiple=True, type=str, callback=cb.multiline_values)
+@click.option('--depends-on', required=False, multiple=True,
+              type=click.Path(exists=True, file_okay=False), callback=cb.multiline_section_name)
 def config_add(ctx, section, registry, file, name, depends_on):
     # pylint: disable=too-many-arguments
     if ctx.obj.config.has_section(section) is False:
@@ -105,6 +106,6 @@ def config_add(ctx, section, registry, file, name, depends_on):
     set_config_option(section, Image.FILE, file)
     set_config_option(section, Image.NAME, name)
     set_config_option(section, Image.DEPENDS_ON, depends_on)
-    set_config_option(section, Image.TYPE, SessionType.IMAGE)
+    set_config_option(section, Image.TYPE, SectionType.IMAGE)
     ctx.obj.helper.validate_section(section)
     ctx.call_on_close(update_config)

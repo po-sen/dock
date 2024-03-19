@@ -3,7 +3,8 @@ import pathlib
 import re
 import click
 from utils import commands as cmd
-from utils.schema import ChartConfigOptions as Chart, ImageConfigOptions as Image, SessionType
+from utils.schema import ChartConfigOptions as Chart, ImageConfigOptions as Image, SectionType
+from utils.utils import topological_sort
 
 
 @dataclasses.dataclass()
@@ -47,7 +48,7 @@ class ChartHelper(ConfigHelper):
     def is_valid_section(self, section):
         if not self.get_section_file(section).exists():
             return False
-        if self.get_section_type(section) != SessionType.CHART.value:
+        if self.get_section_type(section) != SectionType.CHART.value:
             return False
         if not self.get_section_registry(section):
             return False
@@ -96,7 +97,7 @@ class ImageHelper(ConfigHelper):
     def is_valid_section(self, section):
         if not self.get_section_file(section).exists():
             return False
-        if self.get_section_type(section) != SessionType.IMAGE.value:
+        if self.get_section_type(section) != SectionType.IMAGE.value:
             return False
         if not self.get_section_registry(section):
             return False
@@ -107,8 +108,15 @@ class ImageHelper(ConfigHelper):
         return f'{self.get_section_registry(section)}/{self.get_section_name(section)}:{image_tag}'
 
     def get_images(self):
-        return [section for section in self.config.sections() if self.is_valid_section(section)]
+        return topological_sort({section: set(self.get_section_dependencies(section))
+                                 for section in self.config.sections() if self.is_valid_section(section)})
+
+    def is_updated_section(self, section, commit1, commit2):
+        if (self.is_valid_section(section) and
+            cmd.getoutput([self.command.git, 'diff', commit1, commit2, self.get_section_path(section)])):
+            return True
+        return any(self.is_updated_section(depends_on, commit1, commit2)
+                   for depends_on in self.get_section_dependencies(section))
 
     def get_updated_images(self, commit1, commit2):
-        return [section for section in self.get_images()
-                if cmd.getoutput([self.command.git, 'diff', commit1, commit2, self.get_section_path(section)])]
+        return [section for section in self.get_images() if self.is_updated_section(section, commit1, commit2)]
