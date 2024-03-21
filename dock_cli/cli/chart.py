@@ -56,7 +56,9 @@ def chart_package(obj, sections, destination):
 @click.option('--destination', required=False, type=click.Path(file_okay=False, writable=True), default='.')
 def chart_push(obj, sections, destination):
     for section in sections:
-        cmd.run([obj.command.helm, 'push', obj.helper.get_chart_archive_file(section, destination)])
+        cmd.run([obj.command.helm, 'push',
+                 obj.helper.get_chart_archive_file(section, destination),
+                 obj.helper.get_section_registry(section)])
 
 @cli.group(name='config', invoke_without_command=True, cls=hlp.OrderedGroup)
 @click.pass_context
