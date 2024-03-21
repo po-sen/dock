@@ -2,9 +2,9 @@ import configparser
 import logging
 import types
 import click
-import utils.helpers as hlp
-from cli.chart import cli as chart_cli
-from cli.image import cli as image_cli
+from dock_cli.utils import helpers as hlp
+from dock_cli.cli.chart import cli as chart_cli
+from dock_cli.cli.image import cli as image_cli
 
 CONTEXT_SETTINGS = {
     'help_option_names': ['-h', '--help'],

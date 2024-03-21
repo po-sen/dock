@@ -3,9 +3,9 @@ import functools
 import pathlib
 import re
 import click
-from utils import commands as cmd
-from utils.schema import ChartConfigOptions as Chart, ImageConfigOptions as Image, SectionType
-from utils.utils import topological_sort
+from dock_cli.utils import commands as cmd
+from dock_cli.utils.schema import ChartConfigOptions as Chart, ImageConfigOptions as Image, SectionType
+from dock_cli.utils.utils import topological_sort
 
 
 @dataclasses.dataclass()

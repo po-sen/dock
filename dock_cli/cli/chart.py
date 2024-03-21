@@ -1,10 +1,10 @@
 import configparser
 import click
-import utils.callback as cb
-import utils.commands as cmd
-import utils.helpers as hlp
-from utils.schema import ChartConfigOptions as Chart, SectionType
-from utils.utils import update_config, set_config_option, print_dock_config
+from dock_cli.utils import callback as cb
+from dock_cli.utils import commands as cmd
+from dock_cli.utils import helpers as hlp
+from dock_cli.utils.schema import ChartConfigOptions as Chart, SectionType
+from dock_cli.utils.utils import update_config, set_config_option, print_dock_config
 
 @click.group(name='chart', cls=hlp.OrderedGroup)
 @click.pass_obj
