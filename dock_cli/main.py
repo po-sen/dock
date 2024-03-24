@@ -1,5 +1,6 @@
 import configparser
 import logging
+import pathlib
 import types
 import click
 from dock_cli.utils import helpers as hlp
@@ -11,17 +12,9 @@ CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'DOCK',
 }
 
-@click.group(context_settings=CONTEXT_SETTINGS, cls=hlp.OrderedGroup)
+@click.group(context_settings=CONTEXT_SETTINGS, cls=hlp.OrderedGroup,
+             help='CLI tool for managing containerized applications in a Git repository')
 @click.pass_context
-@click.option('--docker',
-              type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
-              help='Path to the Docker command.')
-@click.option('--helm',
-              type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
-              help='Path to the Helm command.')
-@click.option('--git',
-              type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
-              help='Path to the Git command.')
 @click.option('-c', '--config-file',
               type=click.Path(dir_okay=False, readable=True, writable=True, resolve_path=True),
               default='dock.ini',
@@ -32,12 +25,20 @@ CONTEXT_SETTINGS = {
               default='info',
               show_default=True,
               help='Set the logging level.')
+@click.option('--docker',
+              type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
+              help='Path to the Docker command.')
+@click.option('--helm',
+              type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
+              help='Path to the Helm command.')
+@click.option('--git',
+              type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
+              help='Path to the Git command.')
 @click.version_option(package_name='dock-cli')
-def cli(ctx, docker, helm, git, config_file, log_level):
+def cli(ctx, config_file, log_level, docker, helm, git):
     # pylint: disable=too-many-arguments
     logging.basicConfig(level=getattr(logging, log_level.upper()),
-                        datefmt='%Y-%m-%d %H:%M:%S',
-                        format='%(asctime)s - %(levelname)s - %(name)s - "%(message)s"')
+                        format='[%(levelname)s] %(message)s')
 
     ctx.obj = ctx.ensure_object(types.SimpleNamespace)
 
@@ -50,7 +51,9 @@ def cli(ctx, docker, helm, git, config_file, log_level):
     logging.getLogger(__name__).debug('Reading configuration from %s', config_file)
     ctx.obj.config = configparser.ConfigParser()
     ctx.obj.config.read(config_file)
+    ctx.obj.config_dir = pathlib.Path(config_file).parent.as_posix()
     ctx.obj.config_file = config_file
+
 
 cli.add_command(chart_cli)
 cli.add_command(image_cli)

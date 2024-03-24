@@ -21,16 +21,16 @@ class OrderedGroup(click.Group):
 
 
 class ConfigHelper():
-    def __init__(self, config, config_file, command):
+    def __init__(self, config, config_dir, command):
         self.config = config
-        self.parent = pathlib.Path(config_file).parent
+        self.config_dir = config_dir
         self.command = command
 
     def get_section_path(self, section):
-        return self.parent / pathlib.Path(section)
+        return self.config_dir / pathlib.Path(section)
 
     def is_valid_section(self, section):
-        return section in self.config
+        return section in self.config and not pathlib.Path(section).is_absolute()
 
     @functools.lru_cache
     def is_updated_section(self, section, commit1, commit2):
@@ -42,7 +42,7 @@ class ConfigHelper():
 
 class ChartHelper(ConfigHelper):
     def get_section_file(self, section):
-        return self.get_section_path(section) / self.config.get(section, Chart.FILE, fallback='Chart.yaml')
+        return self.get_section_path(section) / 'Chart.yaml'
 
     def get_section_type(self, section):
         return self.config.get(section, Chart.TYPE, fallback='')
@@ -51,16 +51,12 @@ class ChartHelper(ConfigHelper):
         return self.config.get(section, Chart.REGISTRY, fallback='')
 
     def is_valid_section(self, section):
-        if not self.get_section_file(section).exists():
-            return False
-        if self.get_section_type(section) != SectionType.CHART:
-            return False
-        if not self.get_section_registry(section):
-            return False
-        return True
+        return all([super().is_valid_section(section),
+                    self.get_section_file(section).exists(),
+                    self.get_section_type(section) == SectionType.CHART,
+                    self.get_section_registry(section)])
 
     def get_chart_info(self, section):
-        self.validate_section(section)
         return cmd.getoutput([self.command.helm, 'show', 'chart', self.get_section_path(section)])
 
     def get_chart_name(self, section):
@@ -99,16 +95,12 @@ class ImageHelper(ConfigHelper):
         return self.config.get(section, Image.REGISTRY, fallback='')
 
     def is_valid_section(self, section):
-        if not self.get_section_file(section).exists():
-            return False
-        if self.get_section_type(section) != SectionType.IMAGE:
-            return False
-        if not self.get_section_registry(section):
-            return False
-        return True
+        return all([super().is_valid_section(section),
+                    self.get_section_file(section).exists(),
+                    self.get_section_type(section) == SectionType.IMAGE,
+                    self.get_section_registry(section)])
 
     def get_image(self, section, image_tag):
-        self.validate_section(section)
         return f'{self.get_section_registry(section)}/{self.get_section_name(section)}:{image_tag}'
 
     def get_images(self):

@@ -5,7 +5,7 @@ from dock_cli.utils import callback as cb
 from dock_cli.utils import commands as cmd
 from dock_cli.utils import helpers as hlp
 from dock_cli.utils.schema import ImageConfigOptions as Image, SectionType
-from dock_cli.utils.utils import update_config, set_config_option, print_dock_config
+from dock_cli.utils.utils import update_config, set_config_option, print_image_config
 
 @click.group(name='image', cls=hlp.OrderedGroup)
 @click.pass_obj
@@ -14,7 +14,7 @@ def cli(obj):
 
     This is a command line interface for manage images
     """
-    obj.helper = hlp.ImageHelper(obj.config, obj.config_file, obj.command)
+    obj.helper = hlp.ImageHelper(obj.config, obj.config_dir, obj.command)
 
 @cli.command(name='list',
              help='List all images')
@@ -35,7 +35,7 @@ def image_diff(obj, commit1, commit2):
 @cli.command(name='show',
              help='Show detailed information about a specific image')
 @click.pass_obj
-@click.argument('section', required=True, type=click.Path(exists=True, file_okay=False), callback=cb.section_name)
+@click.argument('section', required=True, type=str, callback=cb.validate_section)
 @click.argument('tag', required=False, type=str, default='latest')
 def image_show(obj, section, tag):
     click.echo(obj.helper.get_image(section, tag))
@@ -43,9 +43,9 @@ def image_show(obj, section, tag):
 @cli.command(name='build',
              help='Build images')
 @click.pass_obj
-@click.argument('sections', nargs=-1, required=True,
-                type=click.Path(exists=True, file_okay=False), callback=cb.section_name)
-@click.option('--tag', 'tags', multiple=True, type=str, default=['latest'])
+@click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
+@click.option('--tag', 'tags', multiple=True, type=str, default=['latest'], show_default=True,
+              help='Specify one or multiple tags for the image')
 def image_build(obj, sections, tags):
     for section in sections:
         cmd.run([obj.command.docker, 'build', obj.helper.get_section_path(section),
@@ -55,22 +55,24 @@ def image_build(obj, sections, tags):
 @cli.command(name='push',
              help='Push images')
 @click.pass_obj
-@click.argument('sections', nargs=-1, required=True,
-                type=click.Path(exists=True, file_okay=False), callback=cb.section_name)
-@click.option('--tag', 'tags', multiple=True, type=str, default=['latest'])
+@click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
+@click.option('--tag', 'tags', multiple=True, type=str, default=['latest'], show_default=True,
+              help='Specify one or multiple tags for the image')
 def image_push(obj, sections, tags):
     for section in sections:
+        obj.helper.validate_section(section)
         for tag in tags:
             cmd.run([obj.command.docker, 'push', obj.helper.get_image(section, tag)])
 
 @cli.command(name='clean',
              help='Clean images')
 @click.pass_obj
-@click.argument('sections', nargs=-1, required=True,
-                type=click.Path(exists=True, file_okay=False), callback=cb.section_name)
-@click.option('--tag', 'tags', multiple=True, type=str, default=['latest'])
+@click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
+@click.option('--tag', 'tags', multiple=True, type=str, default=['latest'], show_default=True,
+              help='Specify one or multiple tags for the image')
 def image_clean(obj, sections, tags):
     for section in sections:
+        obj.helper.validate_section(section)
         for tag in tags:
             cmd.run([obj.command.docker, 'rmi', '--force', obj.helper.get_image(section, tag)])
 
@@ -83,39 +85,41 @@ def config_cli(ctx):
     """
     if ctx.invoked_subcommand is None:
         for section in ctx.obj.helper.get_images():
-            print_dock_config(section, Image)
+            print_image_config(section)
         ctx.call_on_close(update_config)
 
 @config_cli.command(name='init',
                     help='Initialize image default settings in the configuration')
 @click.pass_context
-@click.option('--registry', required=False, type=str, default='namespace')
-@click.option('--file', required=False, type=str, default='Dockerfile')
-def config_init(ctx, registry, file):
+@click.option('--registry', required=False, type=str, default='namespace',
+              help='Default registry for all images.')
+def config_init(ctx, registry):
     set_config_option(configparser.DEFAULTSECT, Image.REGISTRY, registry)
-    set_config_option(configparser.DEFAULTSECT, Image.FILE, file)
     for section in ctx.obj.helper.get_images():
-        print_dock_config(section, Image)
+        print_image_config(section)
     ctx.call_on_close(update_config)
 
-@config_cli.command(name='set',
+@config_cli.command(name='add',
                     help='Add or update an image section in the configuration')
 @click.pass_context
-@click.argument('section', required=True, type=click.Path(exists=True, file_okay=False), callback=cb.section_name)
-@click.option('--registry', required=False, type=str)
-@click.option('--file', required=False, type=str)
-@click.option('--name', required=False, type=str)
+@click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
+                callback=cb.transform_to_section)
+@click.option('--file', required=False, type=str, default='Dockerfile', show_default=True,
+              help='Name of the Dockerfile for this section.')
+@click.option('--name', required=False, type=str,
+              help='Name of the image for this section.')
 @click.option('--depends-on', required=False, multiple=True,
-              type=click.Path(exists=True, file_okay=False), callback=cb.multiline_section_name)
-def config_set(ctx, section, registry, file, name, depends_on):
+              type=click.Path(exists=True, file_okay=False),
+              callback=cb.multiline_sections,
+              help='List of sections or paths that this section depends on.')
+def config_add(ctx, section, file, name, depends_on):
     # pylint: disable=too-many-arguments
     if ctx.obj.config.has_section(section) is False:
         ctx.obj.config.add_section(section)
-    set_config_option(section, Image.REGISTRY, registry)
     set_config_option(section, Image.FILE, file)
     set_config_option(section, Image.NAME, name)
     set_config_option(section, Image.DEPENDS_ON, depends_on)
     set_config_option(section, Image.TYPE, SectionType.IMAGE)
     ctx.obj.helper.validate_section(section)
-    print_dock_config(section, Image)
+    print_image_config(section)
     ctx.call_on_close(update_config)

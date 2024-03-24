@@ -3,7 +3,6 @@ import enum
 @enum.unique
 class ChartConfigOptions(str, enum.Enum):
     REGISTRY = 'oci-registry'
-    FILE = 'chart-file'
     TYPE = 'type'
     def __str__(self):
         return self.value

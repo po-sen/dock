@@ -1,14 +1,24 @@
-import pathlib
+from dock_cli.utils.utils import to_section
 
-def section_name(_ctx, _param, value):
+def validate_section(ctx, _param, value):
     if isinstance(value, tuple):
-        return tuple(pathlib.Path(section).as_posix() for section in value)
-    return None if not value else pathlib.Path(value).as_posix()
-
-def multiline_values(_ctx, _param, value):
-    if isinstance(value, tuple):
-        return None if not value else '\n' + '\n'.join(value)
+        for section in value:
+            ctx.obj.helper.validate_section(section)
+    if isinstance(value, str):
+        ctx.obj.helper.validate_section(value)
     return value
 
-def multiline_section_name(ctx, param, value):
-    return multiline_values(ctx, param, section_name(ctx, param, value))
+def transform_to_section(_ctx, _param, value):
+    if isinstance(value, tuple):
+        return tuple(map(to_section, value))
+    if isinstance(value, str):
+        return to_section(value)
+    return value
+
+def multiline_values(_ctx, _param, value):
+    if isinstance(value, tuple) and value:
+        return '\n' + '\n'.join(value)
+    return value
+
+def multiline_sections(ctx, param, value):
+    return multiline_values(ctx, param, transform_to_section(ctx, param, value))
