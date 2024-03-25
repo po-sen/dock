@@ -32,7 +32,7 @@ class ConfigHelper():
     def is_valid_section(self, section):
         return section in self.config and not pathlib.Path(section).is_absolute()
 
-    @functools.lru_cache
+    @functools.lru_cache()
     def is_updated_section(self, section, commit1, commit2):
         return cmd.getoutput([self.command.git, 'diff', commit1, commit2, '--', self.get_section_path(section)]) != ''
 

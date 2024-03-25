@@ -1,6 +1,9 @@
 [MESSAGES CONTROL]
 disable=C0114,C0115,C0116
 
+[BASIC]
+good-names=fp
+
 [TYPECHECK]
 signature-mutators=click.decorators.option,
                    click.decorators.argument,

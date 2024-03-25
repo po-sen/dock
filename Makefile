@@ -39,7 +39,8 @@ test: init .pylintrc test/requirements.txt
 	@set -euo pipefail; \
 	$(VENV)/bin/pip install -Uqr test/requirements.txt; \
 	$(VENV)/bin/pip list; \
-	$(VENV)/bin/pylint $(DOCK_CLI) --rcfile .pylintrc --reports y;
+	$(VENV)/bin/pylint $(DOCK_CLI) --rcfile .pylintrc --reports y; \
+	$(VENV)/bin/pytest test;
 
 PHONY += clean
 clean:
