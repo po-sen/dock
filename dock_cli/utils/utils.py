@@ -3,11 +3,10 @@ import pathlib
 import click
 from dock_cli.utils.schema import ImageConfigOptions as Image, ChartConfigOptions as Chart
 
-@click.pass_obj
-def update_config(obj):
-    logging.getLogger(__name__).debug('Updating configuration to %s', obj.config_file)
-    with open(obj.config_file, 'w', encoding='utf-8') as fp:
-        obj.config.write(fp)
+def update_config(config, config_file):
+    logging.getLogger(__name__).debug('Updating configuration to %s', config_file)
+    with open(config_file, 'w', encoding='utf-8') as fp:
+        config.write(fp)
 
 @click.pass_obj
 def to_section(obj, value):

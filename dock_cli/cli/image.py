@@ -4,8 +4,8 @@ import click
 from dock_cli.utils import callback as cb
 from dock_cli.utils import commands as cmd
 from dock_cli.utils import helpers as hlp
+from dock_cli.utils import utils
 from dock_cli.utils.schema import ImageConfigOptions as Image, SectionType
-from dock_cli.utils.utils import update_config, set_config_option, print_image_config
 
 @click.group(name='image', cls=hlp.OrderedGroup)
 @click.pass_obj
@@ -85,23 +85,22 @@ def config_cli(ctx):
     """
     if ctx.invoked_subcommand is None:
         for section in ctx.obj.helper.get_images():
-            print_image_config(section)
-        ctx.call_on_close(update_config)
+            utils.print_image_config(section)
 
 @config_cli.command(name='init',
                     help='Initialize image default settings in the configuration')
-@click.pass_context
+@click.pass_obj
 @click.option('--registry', required=False, type=str, default='namespace',
               help='Default registry for all images.')
-def config_init(ctx, registry):
-    set_config_option(configparser.DEFAULTSECT, Image.REGISTRY, registry)
-    for section in ctx.obj.helper.get_images():
-        print_image_config(section)
-    ctx.call_on_close(update_config)
+def config_init(obj, registry):
+    utils.set_config_option(configparser.DEFAULTSECT, Image.REGISTRY, registry)
+    for section in obj.helper.get_images():
+        utils.print_image_config(section)
+    utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='add',
                     help='Add or update an image section in the configuration')
-@click.pass_context
+@click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
 @click.option('--file', required=False, type=str, default='Dockerfile', show_default=True,
@@ -112,14 +111,14 @@ def config_init(ctx, registry):
               type=click.Path(exists=True, file_okay=False),
               callback=cb.multiline_sections,
               help='List of sections or paths that this section depends on.')
-def config_add(ctx, section, file, name, depends_on):
+def config_add(obj, section, file, name, depends_on):
     # pylint: disable=too-many-arguments
-    if ctx.obj.config.has_section(section) is False:
-        ctx.obj.config.add_section(section)
-    set_config_option(section, Image.FILE, file)
-    set_config_option(section, Image.NAME, name)
-    set_config_option(section, Image.DEPENDS_ON, depends_on)
-    set_config_option(section, Image.TYPE, SectionType.IMAGE)
-    ctx.obj.helper.validate_section(section)
-    print_image_config(section)
-    ctx.call_on_close(update_config)
+    if obj.config.has_section(section) is False:
+        obj.config.add_section(section)
+    utils.set_config_option(section, Image.FILE, file)
+    utils.set_config_option(section, Image.NAME, name)
+    utils.set_config_option(section, Image.DEPENDS_ON, depends_on)
+    utils.set_config_option(section, Image.TYPE, SectionType.IMAGE)
+    obj.helper.validate_section(section)
+    utils.print_image_config(section)
+    utils.update_config(obj.config, obj.config_file)

@@ -40,20 +40,17 @@ def cli(ctx, config_file, log_level, docker, helm, git):
     logging.basicConfig(level=getattr(logging, log_level.upper()),
                         format='[%(levelname)s] %(message)s')
 
-    ctx.obj = ctx.ensure_object(types.SimpleNamespace)
-
-    command = hlp.Command()
-    command.docker = command.docker if docker is None else docker
-    command.helm = command.helm if helm is None else helm
-    command.git = command.git if git is None else git
-    ctx.obj.command = command
+    ctx.ensure_object(types.SimpleNamespace)
+    ctx.obj.command = hlp.Command()
+    ctx.obj.command.docker = ctx.obj.command.docker if docker is None else docker
+    ctx.obj.command.helm = ctx.obj.command.helm if helm is None else helm
+    ctx.obj.command.git = ctx.obj.command.git if git is None else git
 
     logging.getLogger(__name__).debug('Reading configuration from %s', config_file)
     ctx.obj.config = configparser.ConfigParser()
     ctx.obj.config.read(config_file)
     ctx.obj.config_dir = pathlib.Path(config_file).parent.as_posix()
     ctx.obj.config_file = config_file
-
 
 cli.add_command(chart_cli)
 cli.add_command(image_cli)

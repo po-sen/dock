@@ -29,12 +29,12 @@ class ConfigHelper():
     def get_section_path(self, section):
         return self.config_dir / pathlib.Path(section)
 
-    def is_valid_section(self, section):
-        return section in self.config and not pathlib.Path(section).is_absolute()
-
     @functools.lru_cache()
     def is_updated_section(self, section, commit1, commit2):
         return cmd.getoutput([self.command.git, 'diff', commit1, commit2, '--', self.get_section_path(section)]) != ''
+
+    def is_valid_section(self, section):
+        return section in self.config and not pathlib.Path(section).is_absolute()
 
     def validate_section(self, section):
         assert self.is_valid_section(section), f"Expected the section '{section}' is valid."

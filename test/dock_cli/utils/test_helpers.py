@@ -2,9 +2,9 @@ import pytest
 from dock_cli.utils.schema import SectionType
 
 class TestChartHelper():
-    def test_get_section_path(self, chart_helper, chart_section, test_repo):
+    def test_get_section_path(self, chart_helper, chart_section, config_file):
         result = chart_helper.get_section_path(chart_section.section)
-        assert result == test_repo / chart_section.section
+        assert result == config_file.parent / chart_section.section
 
     def test_is_valid_section_true(self, chart_helper, chart_section):
         result = chart_helper.is_valid_section(chart_section.section)
@@ -23,9 +23,9 @@ class TestChartHelper():
             chart_helper.validate_section(invalid_chart_section.section)
         assert str(excinfo.value) == f"Expected the section '{invalid_chart_section.section}' is valid."
 
-    def test_get_section_file(self, chart_helper, chart_section, test_repo):
+    def test_get_section_file(self, chart_helper, chart_section, config_file):
         result = chart_helper.get_section_file(chart_section.section)
-        assert result == test_repo / chart_section.section / 'Chart.yaml'
+        assert result == config_file.parent / chart_section.section / 'Chart.yaml'
 
     def test_get_section_type(self, chart_helper, chart_section):
         result = chart_helper.get_section_type(chart_section.section)
@@ -67,9 +67,9 @@ class TestChartHelper():
 
 
 class TestImageHelper():
-    def test_get_section_path(self, image_helper, image_section, test_repo):
+    def test_get_section_path(self, image_helper, image_section, config_file):
         result = image_helper.get_section_path(image_section.section)
-        assert result == test_repo / image_section.section
+        assert result == config_file.parent / image_section.section
 
     def test_is_valid_section_true(self, image_helper, image_section):
         result = image_helper.is_valid_section(image_section.section)
@@ -88,9 +88,9 @@ class TestImageHelper():
             image_helper.validate_section(invalid_image_section.section)
         assert str(excinfo.value) == f"Expected the section '{invalid_image_section.section}' is valid."
 
-    def test_get_section_file(self, image_helper, image_section, test_repo):
+    def test_get_section_file(self, image_helper, image_section, config_file):
         result = image_helper.get_section_file(image_section.section)
-        assert result == test_repo / image_section.section / 'Dockerfile'
+        assert result == config_file.parent / image_section.section / 'Dockerfile'
 
     def test_get_section_type(self, image_helper, image_section):
         result = image_helper.get_section_type(image_section.section)

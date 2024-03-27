@@ -3,8 +3,8 @@ import click
 from dock_cli.utils import callback as cb
 from dock_cli.utils import commands as cmd
 from dock_cli.utils import helpers as hlp
+from dock_cli.utils import utils
 from dock_cli.utils.schema import ChartConfigOptions as Chart, SectionType
-from dock_cli.utils.utils import update_config, set_config_option, print_chart_config
 
 @click.group(name='chart', cls=hlp.OrderedGroup)
 @click.pass_obj
@@ -67,29 +67,28 @@ def config_cli(ctx):
     """
     if ctx.invoked_subcommand is None:
         for section in ctx.obj.helper.get_charts():
-            print_chart_config(section)
-        ctx.call_on_close(update_config)
+            utils.print_chart_config(section)
 
 @config_cli.command(name='init',
                     help='Initialize chart default settings in the configuration')
-@click.pass_context
+@click.pass_obj
 @click.option('--registry', required=False, type=str, default='oci://registry-1.docker.io/namespace', show_default=True,
               help='Default oci registry for all charts.')
-def config_init(ctx, registry):
-    set_config_option(configparser.DEFAULTSECT, Chart.REGISTRY, registry)
-    for section in ctx.obj.helper.get_charts():
-        print_chart_config(section)
-    ctx.call_on_close(update_config)
+def config_init(obj, registry):
+    utils.set_config_option(configparser.DEFAULTSECT, Chart.REGISTRY, registry)
+    for section in obj.helper.get_charts():
+        utils.print_chart_config(section)
+    utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='add',
                     help='Add or update an chart section in the configuration')
-@click.pass_context
+@click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
-def config_set(ctx, section):
-    if ctx.obj.config.has_section(section) is False:
-        ctx.obj.config.add_section(section)
-    set_config_option(section, Chart.TYPE, SectionType.CHART)
-    ctx.obj.helper.validate_section(section)
-    print_chart_config(section)
-    ctx.call_on_close(update_config)
+def config_set(obj, section):
+    if obj.config.has_section(section) is False:
+        obj.config.add_section(section)
+    utils.set_config_option(section, Chart.TYPE, SectionType.CHART)
+    obj.helper.validate_section(section)
+    utils.print_chart_config(section)
+    utils.update_config(obj.config, obj.config_file)
