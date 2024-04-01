@@ -17,6 +17,8 @@ class ImageSection():
     name: str
     registry: str = 'namespace'
 
+CONFIG_FILE = pathlib.Path(__file__).resolve().parent.parent / 'repo' / 'dock.ini'
+
 CONFIG_CHART_SECTIONS = [
     ChartSection('charts/chart-1', 'chart-1'),
     ChartSection('charts/chart-2', 'chart-2'),
@@ -66,7 +68,7 @@ def help_option(request):
 
 @pytest.fixture(scope='function')
 def config_file():
-    return pathlib.Path(__file__).resolve().parent.parent / 'repo' / 'dock.ini'
+    return CONFIG_FILE
 
 @pytest.fixture(scope='function',
                 params=CONFIG_CHART_SECTIONS,
@@ -122,10 +124,22 @@ def image_list():
 def initial_commit():
     return '472afe80cb490b6827e775bcc8b0a42eaee27db5'
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope='function')
 def mock_commands_run(mocker):
     mock = mocker.patch('dock_cli.utils.commands.run')
     mock.return_value = mocker.MagicMock()
+    return mock
+
+@pytest.fixture(scope='function', autouse=True)
+def mock_config_open(mocker):
+    mock = mocker.patch('dock_cli.utils.utils.open')
+    mock.new_callable = mocker.mock_open
+    return mock
+
+@pytest.fixture(scope='function')
+def mock_subprocess_run(mocker):
+    mock = mocker.patch('dock_cli.utils.commands.subprocess.run')
+    mock.return_value = mocker.MagicMock(check_returncode=lambda: None)
     return mock
 
 @pytest.fixture(scope='function')

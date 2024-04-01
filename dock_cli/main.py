@@ -41,10 +41,7 @@ def cli(ctx, config_file, log_level, docker, helm, git):
                         format='[%(levelname)s] %(message)s')
 
     ctx.ensure_object(types.SimpleNamespace)
-    ctx.obj.command = hlp.Command()
-    ctx.obj.command.docker = ctx.obj.command.docker if docker is None else docker
-    ctx.obj.command.helm = ctx.obj.command.helm if helm is None else helm
-    ctx.obj.command.git = ctx.obj.command.git if git is None else git
+    ctx.obj.command = hlp.Command(docker, helm, git)
 
     logging.getLogger(__name__).debug('Reading configuration from %s', config_file)
     ctx.obj.config = configparser.ConfigParser()

@@ -8,33 +8,29 @@ def update_config(config, config_file):
     with open(config_file, 'w', encoding='utf-8') as fp:
         config.write(fp)
 
-@click.pass_obj
-def to_section(obj, value):
-    section = pathlib.Path(value).resolve().relative_to(obj.config_dir).as_posix()
+def to_section(config_dir, value):
+    section = pathlib.Path(value).resolve().relative_to(config_dir).as_posix()
     logging.getLogger(__name__).debug('Transform value `%s` to section `%s`', value, section)
     return section
 
-@click.pass_obj
-def set_config_option(obj, section, option, value=None):
+def set_config_option(config, section, option, value=None):
     logging.getLogger(__name__).debug('Removing section [%s] option `%s`', section, option)
-    obj.config.remove_option(section, option)
+    config.remove_option(section, option)
     if value:
         logging.getLogger(__name__).debug('Setting section [%s] option `%s` to `%s`', section, option, value)
-        obj.config.set(section, option, value)
+        config.set(section, option, value)
         click.echo(f'Set [{section}] {option} = {value}')
 
-@click.pass_obj
-def print_image_config(obj, section):
+def print_image_config(config, section):
     click.echo(f"{click.style(section, fg='bright_cyan')}:")
     for option in Image:
-        value = ' '.join(obj.config.get(section, option, fallback='').strip().splitlines())
+        value = ' '.join(config.get(section, option, fallback='').strip().splitlines())
         click.echo(f"- {click.style(option, fg='green')}: {click.style(value, fg='yellow')}")
 
-@click.pass_obj
-def print_chart_config(obj, section):
+def print_chart_config(config, section):
     click.echo(f"{click.style(section, fg='bright_cyan')}:")
     for option in Chart:
-        value = ' '.join(obj.config.get(section, option, fallback='').strip().splitlines())
+        value = ' '.join(config.get(section, option, fallback='').strip().splitlines())
         click.echo(f"- {click.style(option, fg='green')}: {click.style(value, fg='yellow')}")
 
 def topological_sort(dependencies):

@@ -6,10 +6,10 @@ from dock_cli.utils.helpers import Command, ChartHelper, ImageHelper
 def chart_helper(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)
-    return ChartHelper(config, config_file.parent, Command())
+    return ChartHelper(config, config_file.parent, Command(None, None, None))
 
 @pytest.fixture(scope='function')
 def image_helper(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)
-    return ImageHelper(config, config_file.parent, Command())
+    return ImageHelper(config, config_file.parent, Command(None, None, None))

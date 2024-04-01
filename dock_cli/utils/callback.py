@@ -1,4 +1,5 @@
-from dock_cli.utils.utils import to_section
+import functools
+from dock_cli.utils import utils
 
 def validate_section(ctx, _param, value):
     if isinstance(value, tuple):
@@ -8,12 +9,10 @@ def validate_section(ctx, _param, value):
         ctx.obj.helper.validate_section(value)
     return value
 
-def transform_to_section(_ctx, _param, value):
+def transform_to_section(ctx, _param, value):
     if isinstance(value, tuple):
-        return tuple(map(to_section, value))
-    if isinstance(value, str):
-        return to_section(value)
-    return value
+        return tuple(map(functools.partial(utils.to_section, ctx.obj.config_dir), value))
+    return utils.to_section(ctx.obj.config_dir, value)
 
 def multiline_values(_ctx, _param, value):
     if isinstance(value, tuple) and value:

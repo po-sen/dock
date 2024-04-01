@@ -75,6 +75,19 @@ def test_image_config_add(runner, env, dock, mock_update_config, valid_image_sec
     assert result.exit_code == 0
     assert result.output != ''
 
+def test_image_config_add_with_params(runner, env, dock, mock_update_config, valid_image_section, config_file):
+    # pylint: disable=too-many-arguments
+    path = str(config_file.parent / valid_image_section.section)
+    result = runner.invoke(dock, ['image', 'config', 'add', path,
+                                  '--file=Dockerfile',
+                                  f'--name={valid_image_section.name}',
+                                  f'--depends-on={config_file.parent}/images/image-1',
+                                  f'--depends-on={config_file.parent}/charts/chart-1',
+                                  f'--depends-on={config_file.parent}/.'], env=env)
+    mock_update_config.assert_called_once()
+    assert result.exit_code == 0
+    assert result.output != ''
+
 def test_image_config_add_error(runner, env, dock, mock_update_config, invalid_image_section, config_file):
     # pylint: disable=too-many-arguments
     path = str(config_file.parent / invalid_image_section.section)

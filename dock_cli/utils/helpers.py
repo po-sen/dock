@@ -10,9 +10,16 @@ from dock_cli.utils.utils import topological_sort
 
 @dataclasses.dataclass()
 class Command():
-    docker: str = 'docker'
-    helm: str = 'helm'
-    git: str = 'git'
+    __slots__ = ['docker', 'helm', 'git']
+
+    docker: str
+    helm: str
+    git: str
+
+    def __post_init__(self):
+        self.docker = 'docker' if self.docker is None else self.docker
+        self.helm = 'helm' if self.helm is None else self.helm
+        self.git = 'git' if self.git is None else self.git
 
 
 class OrderedGroup(click.Group):

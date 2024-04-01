@@ -67,7 +67,7 @@ def config_cli(ctx):
     """
     if ctx.invoked_subcommand is None:
         for section in ctx.obj.helper.get_charts():
-            utils.print_chart_config(section)
+            utils.print_chart_config(ctx.obj.config, section)
 
 @config_cli.command(name='init',
                     help='Initialize chart default settings in the configuration')
@@ -75,9 +75,9 @@ def config_cli(ctx):
 @click.option('--registry', required=False, type=str, default='oci://registry-1.docker.io/namespace', show_default=True,
               help='Default oci registry for all charts.')
 def config_init(obj, registry):
-    utils.set_config_option(configparser.DEFAULTSECT, Chart.REGISTRY, registry)
+    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
     for section in obj.helper.get_charts():
-        utils.print_chart_config(section)
+        utils.print_chart_config(obj.config, section)
     utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='add',
@@ -88,7 +88,7 @@ def config_init(obj, registry):
 def config_set(obj, section):
     if obj.config.has_section(section) is False:
         obj.config.add_section(section)
-    utils.set_config_option(section, Chart.TYPE, SectionType.CHART)
+    utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
     obj.helper.validate_section(section)
-    utils.print_chart_config(section)
+    utils.print_chart_config(obj.config, section)
     utils.update_config(obj.config, obj.config_file)

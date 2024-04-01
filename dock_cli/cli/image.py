@@ -85,7 +85,7 @@ def config_cli(ctx):
     """
     if ctx.invoked_subcommand is None:
         for section in ctx.obj.helper.get_images():
-            utils.print_image_config(section)
+            utils.print_image_config(ctx.obj.config, section)
 
 @config_cli.command(name='init',
                     help='Initialize image default settings in the configuration')
@@ -93,9 +93,9 @@ def config_cli(ctx):
 @click.option('--registry', required=False, type=str, default='namespace',
               help='Default registry for all images.')
 def config_init(obj, registry):
-    utils.set_config_option(configparser.DEFAULTSECT, Image.REGISTRY, registry)
+    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
     for section in obj.helper.get_images():
-        utils.print_image_config(section)
+        utils.print_image_config(obj.config, section)
     utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='add',
@@ -115,10 +115,10 @@ def config_add(obj, section, file, name, depends_on):
     # pylint: disable=too-many-arguments
     if obj.config.has_section(section) is False:
         obj.config.add_section(section)
-    utils.set_config_option(section, Image.FILE, file)
-    utils.set_config_option(section, Image.NAME, name)
-    utils.set_config_option(section, Image.DEPENDS_ON, depends_on)
-    utils.set_config_option(section, Image.TYPE, SectionType.IMAGE)
+    utils.set_config_option(obj.config, section, Image.FILE, file)
+    utils.set_config_option(obj.config, section, Image.NAME, name)
+    utils.set_config_option(obj.config, section, Image.DEPENDS_ON, depends_on)
+    utils.set_config_option(obj.config, section, Image.TYPE, SectionType.IMAGE)
     obj.helper.validate_section(section)
-    utils.print_image_config(section)
+    utils.print_image_config(obj.config, section)
     utils.update_config(obj.config, obj.config_file)
