@@ -1,21 +1,7 @@
-import dataclasses
 import pathlib
 import pytest
-from click.testing import CliRunner
+from helpers import ChartSection, ImageSection
 from dock_cli.main import cli
-
-@dataclasses.dataclass()
-class ChartSection():
-    section: str
-    name: str
-    version: str = '0.1.0'
-    registry: str = 'oci://registry-1.docker.io/namespace'
-
-@dataclasses.dataclass()
-class ImageSection():
-    section: str
-    name: str
-    registry: str = 'namespace'
 
 CONFIG_FILE = pathlib.Path(__file__).resolve().parent.parent / 'repo' / 'dock.ini'
 
@@ -52,10 +38,6 @@ INVALID_IMAGE_SECTIONS = [
     ImageSection('images/image-mew', 'image-mew'),
     ImageSection('images/image-omg', 'image-omg'),
 ]
-
-@pytest.fixture(scope='function')
-def runner():
-    return CliRunner()
 
 @pytest.fixture(scope='session')
 def dock():
