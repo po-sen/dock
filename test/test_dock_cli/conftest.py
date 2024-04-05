@@ -3,7 +3,7 @@ import pytest
 from helpers import ChartSection, ImageSection
 from dock_cli.main import cli
 
-CONFIG_FILE = pathlib.Path(__file__).resolve().parent.parent / 'repo' / 'dock.ini'
+CONFIG_FILE = pathlib.Path(__file__).resolve().parent.parent / 'dummy_repo' / 'dock.ini'
 
 CONFIG_CHART_SECTIONS = [
     ChartSection('charts/chart-1', 'chart-1'),
