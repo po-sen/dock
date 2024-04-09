@@ -1,4 +1,5 @@
 import configparser
+import logging
 import click
 from dock_cli.utils import callback as cb
 from dock_cli.utils import commands as cmd
@@ -58,29 +59,24 @@ def chart_push(obj, sections, destination):
                  obj.helper.get_chart_archive_file(section, destination),
                  obj.helper.get_section_registry(section)])
 
-@cli.group(name='config', invoke_without_command=True, cls=hlp.OrderedGroup)
-@click.pass_context
-def config_cli(ctx):
+@cli.group(name='config', cls=hlp.OrderedGroup)
+def config_cli():
     """Manage charts' configuration
 
     This is a command line interface for manage charts' configuration
     """
-    if ctx.invoked_subcommand is None:
-        for section in ctx.obj.helper.get_charts():
-            utils.print_chart_config(ctx.obj.config, section)
 
-@config_cli.command(name='init',
-                    help='Initialize chart default settings in the configuration')
+@config_cli.command(name='view',
+                    help="View current charts' configuration")
 @click.pass_obj
-@click.option('--registry', required=False, type=str, default='oci://registry-1.docker.io/namespace', show_default=True,
-              help='Default oci registry for all charts.')
-def config_init(obj, registry):
-    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
+def config_view(obj):
+    sections = obj.helper.get_charts()
+    if not sections:
+        logging.getLogger(__name__).warning('No charts found.')
     for section in obj.helper.get_charts():
         utils.print_chart_config(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
 
-@config_cli.command(name='add',
+@config_cli.command(name='set',
                     help='Add or update an chart section in the configuration')
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
@@ -91,4 +87,14 @@ def config_set(obj, section):
     utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
     obj.helper.validate_section(section)
     utils.print_chart_config(obj.config, section)
+    utils.update_config(obj.config, obj.config_file)
+
+@config_cli.command(name='set-registry',
+                    help='Set default registry for all charts in the configuration')
+@click.pass_obj
+@click.argument('registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
+def config_set_registry(obj, registry):
+    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
+    for section in obj.helper.get_charts():
+        utils.print_chart_config(obj.config, section)
     utils.update_config(obj.config, obj.config_file)

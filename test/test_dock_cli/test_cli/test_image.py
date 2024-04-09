@@ -51,27 +51,27 @@ def test_image_clean(dock, env, image_section, mock_commands_run):
                                                f'{image_section.registry}/{image_section.name}:latest'])
     assert output == ''
 
-def test_image_config(dock, env, image_list, mock_update_config):
-    output = invoke_cli(dock, ['image', 'config'], env=env)
+def test_image_config_view(dock, env, image_list, mock_update_config):
+    output = invoke_cli(dock, ['image', 'config', 'view'], env=env)
     mock_update_config.assert_not_called()
     for section in image_list:
         assert f'{section}:\n' in output
 
-def test_image_config_init(dock, env, mock_update_config):
-    output = invoke_cli(dock, ['image', 'config', 'init', '--registry', 'mew'], env=env)
-    mock_update_config.assert_called_once()
-    assert output.splitlines()[0] == 'Set [DEFAULT] registry = mew'
+def test_image_config_view_no_images(dock, env_dne, mock_update_config):
+    output = invoke_cli(dock, ['image', 'config', 'view'], env=env_dne)
+    mock_update_config.assert_not_called()
+    assert output == ''
 
-def test_image_config_add(dock, env, valid_image_section, config_file, mock_update_config):
+def test_image_config_set(dock, env, valid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_image_section.section)
-    output = invoke_cli(dock, ['image', 'config', 'add', path], env=env)
+    output = invoke_cli(dock, ['image', 'config', 'set', path], env=env)
     mock_update_config.assert_called_once()
     assert f'Set [{valid_image_section.section}] type = image\n' in output
     assert f'{valid_image_section.section}:\n' in output
 
-def test_image_config_add_with_params(dock, env, valid_image_section, config_file, mock_update_config):
+def test_image_config_set_with_params(dock, env, valid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_image_section.section)
-    output = invoke_cli(dock, ['image', 'config', 'add', path,
+    output = invoke_cli(dock, ['image', 'config', 'set', path,
                                '--file=Dockerfile',
                                f'--name={valid_image_section.name}',
                                f'--depends-on={config_file.parent}/images/image-1',
@@ -81,8 +81,13 @@ def test_image_config_add_with_params(dock, env, valid_image_section, config_fil
     assert f'Set [{valid_image_section.section}] type = image\n' in output
     assert f'{valid_image_section.section}:\n' in output
 
-def test_image_config_add_error(dock, env, invalid_image_section, config_file, mock_update_config):
+def test_image_config_set_error(dock, env, invalid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / invalid_image_section.section)
-    output = invoke_cli(dock, ['image', 'config', 'add', path], env=env, expected_exit_code=2)
+    output = invoke_cli(dock, ['image', 'config', 'set', path], env=env, expected_exit_code=2)
     mock_update_config.assert_not_called()
     assert "Error: Invalid value for 'SECTION':" in output
+
+def test_image_config_set_registry(dock, env, mock_update_config):
+    output = invoke_cli(dock, ['image', 'config', 'set-registry', 'mew'], env=env)
+    mock_update_config.assert_called_once()
+    assert output.splitlines()[0] == 'Set [DEFAULT] registry = mew'

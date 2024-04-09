@@ -1,5 +1,6 @@
 import configparser
 import itertools
+import logging
 import click
 from dock_cli.utils import callback as cb
 from dock_cli.utils import commands as cmd
@@ -76,33 +77,30 @@ def image_clean(obj, sections, tags):
         for tag in tags:
             cmd.run([obj.command.docker, 'rmi', '--force', obj.helper.get_image(section, tag)])
 
-@cli.group(name='config', invoke_without_command=True, cls=hlp.OrderedGroup)
-@click.pass_context
-def config_cli(ctx):
+@cli.group(name='config', cls=hlp.OrderedGroup)
+def config_cli():
     """Manage images' configuration
 
     This is a command line interface for manage images' configuration
     """
-    if ctx.invoked_subcommand is None:
-        for section in ctx.obj.helper.get_images():
-            utils.print_image_config(ctx.obj.config, section)
 
-@config_cli.command(name='init',
-                    help='Initialize image default settings in the configuration')
+@config_cli.command(name='view',
+                    help="View current images' configuration")
 @click.pass_obj
-@click.option('--registry', required=False, type=str, default='namespace',
-              help='Default registry for all images.')
-def config_init(obj, registry):
-    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
-    for section in obj.helper.get_images():
+def config_view(obj):
+    sections = obj.helper.get_images()
+    if not sections:
+        logging.getLogger(__name__).warning('No images found.')
+    for section in sections:
         utils.print_image_config(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
 
-@config_cli.command(name='add',
+@config_cli.command(name='set',
                     help='Add or update an image section in the configuration')
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
+@click.option('--registry', required=False, type=str,
+              help='Name of the registry for this section.')
 @click.option('--file', required=False, type=str, default='Dockerfile', show_default=True,
               help='Name of the Dockerfile for this section.')
 @click.option('--name', required=False, type=str,
@@ -111,14 +109,25 @@ def config_init(obj, registry):
               type=click.Path(exists=True, file_okay=False),
               callback=cb.multiline_sections,
               help='List of sections or paths that this section depends on.')
-def config_add(obj, section, file, name, depends_on):
+def config_set(obj, section, registry, file, name, depends_on):
     # pylint: disable=too-many-arguments
     if obj.config.has_section(section) is False:
         obj.config.add_section(section)
+    utils.set_config_option(obj.config, section, Image.REGISTRY, registry)
     utils.set_config_option(obj.config, section, Image.FILE, file)
     utils.set_config_option(obj.config, section, Image.NAME, name)
     utils.set_config_option(obj.config, section, Image.DEPENDS_ON, depends_on)
     utils.set_config_option(obj.config, section, Image.TYPE, SectionType.IMAGE)
     obj.helper.validate_section(section)
     utils.print_image_config(obj.config, section)
+    utils.update_config(obj.config, obj.config_file)
+
+@config_cli.command(name='set-registry',
+                    help='Set default registry for all images in the configuration')
+@click.pass_obj
+@click.argument('registry', required=False, type=str, default='namespace')
+def config_set_registry(obj, registry):
+    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
+    for section in obj.helper.get_images():
+        utils.print_image_config(obj.config, section)
     utils.update_config(obj.config, obj.config_file)

@@ -34,26 +34,31 @@ def test_chart_push(dock, env, chart_section, mock_commands_run):
                                                chart_section.registry])
     assert output == ''
 
-def test_chart_config(dock, env, chart_list, mock_update_config):
-    output = invoke_cli(dock, ['chart', 'config'], env=env)
+def test_chart_config_view(dock, env, chart_list, mock_update_config):
+    output = invoke_cli(dock, ['chart', 'config', 'view'], env=env)
     mock_update_config.assert_not_called()
     for section in chart_list:
         assert f'{section}:\n' in output
 
-def test_chart_config_init(dock, env, mock_update_config):
-    output = invoke_cli(dock, ['chart', 'config', 'init', '--registry', 'mew'], env=env)
-    mock_update_config.assert_called_once()
-    assert output.splitlines()[0] == 'Set [DEFAULT] oci-registry = mew'
+def test_chart_config_view_no_charts(dock, env_dne, mock_update_config):
+    output = invoke_cli(dock, ['chart', 'config', 'view'], env=env_dne)
+    mock_update_config.assert_not_called()
+    assert output == ''
 
-def test_chart_config_add(dock, env, valid_chart_section, config_file, mock_update_config):
+def test_chart_config_set(dock, env, valid_chart_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_chart_section.section)
-    output = invoke_cli(dock, ['chart', 'config', 'add', path], env=env)
+    output = invoke_cli(dock, ['chart', 'config', 'set', path], env=env)
     mock_update_config.assert_called_once()
     assert f'Set [{valid_chart_section.section}] type = chart\n' in output
     assert f'{valid_chart_section.section}:\n' in output
 
-def test_chart_config_add_error(dock, env, invalid_chart_section, config_file, mock_update_config):
+def test_chart_config_set_error(dock, env, invalid_chart_section, config_file, mock_update_config):
     path = str(config_file.parent / invalid_chart_section.section)
-    output = invoke_cli(dock, ['chart', 'config', 'add', path], env=env, expected_exit_code=2)
+    output = invoke_cli(dock, ['chart', 'config', 'set', path], env=env, expected_exit_code=2)
     mock_update_config.assert_not_called()
     assert "Error: Invalid value for 'SECTION':" in output
+
+def test_chart_config_set_registry(dock, env, mock_update_config):
+    output = invoke_cli(dock, ['chart', 'config', 'set-registry', 'mew'], env=env)
+    mock_update_config.assert_called_once()
+    assert output.splitlines()[0] == 'Set [DEFAULT] oci-registry = mew'

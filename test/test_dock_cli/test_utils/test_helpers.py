@@ -21,7 +21,7 @@ class TestChartHelper():
     def test_validate_section_error(self, chart_helper, invalid_chart_section):
         with pytest.raises(AssertionError) as excinfo:
             chart_helper.validate_section(invalid_chart_section.section)
-        assert str(excinfo.value) == f"Expected the section '{invalid_chart_section.section}' is valid."
+        assert str(excinfo.value) == f"The section '{invalid_chart_section.section}' is not in the configuration."
 
     def test_get_section_file(self, chart_helper, chart_section, config_file):
         result = chart_helper.get_section_file(chart_section.section)
@@ -86,7 +86,7 @@ class TestImageHelper():
     def test_validate_section_error(self, image_helper, invalid_image_section):
         with pytest.raises(AssertionError) as excinfo:
             image_helper.validate_section(invalid_image_section.section)
-        assert str(excinfo.value) == f"Expected the section '{invalid_image_section.section}' is valid."
+        assert str(excinfo.value) == f"The section '{invalid_image_section.section}' is not in the configuration."
 
     def test_get_section_file(self, image_helper, image_section, config_file):
         result = image_helper.get_section_file(image_section.section)

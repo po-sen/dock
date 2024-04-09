@@ -36,15 +36,22 @@ class ConfigHelper():
     def get_section_path(self, section):
         return self.config_dir / pathlib.Path(section)
 
+    def validate_section(self, section):
+        assert section in self.config, (
+               f"The section '{section}' is not in the configuration.")
+        assert not pathlib.Path(section).is_absolute(), (
+               f"The section '{section}' should be a relative path.")
+
+    def is_valid_section(self, section):
+        try:
+            self.validate_section(section)
+        except AssertionError:
+            return False
+        return True
+
     @functools.lru_cache()
     def is_updated_section(self, section, commit1, commit2):
         return cmd.getoutput([self.command.git, 'diff', commit1, commit2, '--', self.get_section_path(section)]) != ''
-
-    def is_valid_section(self, section):
-        return section in self.config and not pathlib.Path(section).is_absolute()
-
-    def validate_section(self, section):
-        assert self.is_valid_section(section), f"Expected the section '{section}' is valid."
 
 
 class ChartHelper(ConfigHelper):
@@ -57,11 +64,14 @@ class ChartHelper(ConfigHelper):
     def get_section_registry(self, section):
         return self.config.get(section, Chart.REGISTRY, fallback='')
 
-    def is_valid_section(self, section):
-        return all([super().is_valid_section(section),
-                    self.get_section_file(section).exists(),
-                    self.get_section_type(section) == SectionType.CHART,
-                    self.get_section_registry(section)])
+    def validate_section(self, section):
+        super().validate_section(section)
+        assert self.get_section_file(section).exists(), (
+               f"File does not exist: {self.get_section_file(section)}.")
+        assert self.get_section_type(section) == SectionType.CHART, (
+               f"The section '{section}' type should be {SectionType.CHART}.")
+        assert self.get_section_registry(section), (
+               f"The section '{section}' registry should exist.")
 
     def get_chart_info(self, section):
         return cmd.getoutput([self.command.helm, 'show', 'chart', self.get_section_path(section)])
@@ -101,11 +111,14 @@ class ImageHelper(ConfigHelper):
     def get_section_registry(self, section):
         return self.config.get(section, Image.REGISTRY, fallback='')
 
-    def is_valid_section(self, section):
-        return all([super().is_valid_section(section),
-                    self.get_section_file(section).exists(),
-                    self.get_section_type(section) == SectionType.IMAGE,
-                    self.get_section_registry(section)])
+    def validate_section(self, section):
+        super().validate_section(section)
+        assert self.get_section_file(section).exists(), (
+               f"File does not exist: {self.get_section_file(section)}.")
+        assert self.get_section_type(section) == SectionType.IMAGE, (
+               f"The section '{section}' type should be {SectionType.IMAGE}.")
+        assert self.get_section_registry(section), (
+               f"The section '{section}' registry should exist.")
 
     def get_image(self, section, image_tag):
         return f'{self.get_section_registry(section)}/{self.get_section_name(section)}:{image_tag}'
