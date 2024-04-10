@@ -7,12 +7,16 @@ EGG_INFO := dock_cli.egg-info
 DIST_DIR := dist
 
 PYTHON ?= python3
+VENV_PIP ?= $(VENV)/bin/pip3
+VENV_PYTHON ?= $(VENV)/bin/python3
+VENV_PYLINT ?= $(VENV)/bin/pylint
+VENV_PYTEST ?= $(VENV)/bin/pytest
 
 $(VENV):
 	@set -euo pipefail; \
 	$(PYTHON) -m venv $(VENV); \
-	$(VENV)/bin/pip install -Uq pip setuptools wheel; \
-	$(VENV)/bin/pip install -Uqe .; \
+	$(VENV_PIP) install -Uq pip setuptools wheel; \
+	$(VENV_PIP) install -Uqe .; \
 	echo -e "Successfully created a new virtualenv $(VENV) in $$PWD";
 
 PHONY += check-python-version
@@ -32,15 +36,15 @@ init: check-python-version $(VENV)
 PHONY += list
 list: init
 	@set -euo pipefail; \
-	$(VENV)/bin/pip list;
+	$(VENV_PIP) list;
 
 PHONY += test
 test: init .pylintrc test/requirements.txt
 	@set -euo pipefail; \
-	$(VENV)/bin/pip install -Uqr test/requirements.txt; \
-	$(VENV)/bin/pip list; \
-	$(VENV)/bin/pylint $(DOCK_CLI) --rcfile .pylintrc --reports y; \
-	$(VENV)/bin/pytest test;
+	$(VENV_PIP) install -Uqr test/requirements.txt; \
+	$(VENV_PIP) list; \
+	$(VENV_PYLINT) $(DOCK_CLI) --rcfile .pylintrc --reports y; \
+	$(VENV_PYTEST) test;
 
 PHONY += clean
 clean:
@@ -49,14 +53,14 @@ clean:
 PHONY += build-package
 build-package: init
 	@set -euo pipefail; \
-	$(VENV)/bin/pip install -Uq build; \
-	$(VENV)/bin/python3 -m build --outdir $(DIST_DIR);
+	$(VENV_PIP) install -Uq build; \
+	$(VENV_PYTHON) -m build --outdir $(DIST_DIR);
 
 PHONY += upload-package
 upload-package: init
 	@set -euo pipefail; \
-	$(VENV)/bin/pip install -Uq twine; \
-	$(VENV)/bin/python3 -m twine check $(DIST_DIR)/*; \
-	$(VENV)/bin/python3 -m twine upload $(DIST_DIR)/*;
+	$(VENV_PIP) install -Uq twine; \
+	$(VENV_PYTHON) -m twine check $(DIST_DIR)/*; \
+	$(VENV_PYTHON) -m twine upload $(DIST_DIR)/*;
 
 .PHONY: $(PHONY)
