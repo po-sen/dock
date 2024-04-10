@@ -34,6 +34,55 @@ For example, the folder structure of your repository is as follows:
  | - dock.ini
 ```
 
+Where `dock.ini` can be empty or nonexistent, you can use the following command to update `dock.ini`:
+
+```bash
+# Set default registry for all images
+$ dock image config set-registry posen
+Set [DEFAULT] registry = posen
+
+# Set default registry for all charts
+$ dock chart config set-registry oci://registry-1.docker.io/posen
+Set [DEFAULT] oci-registry = oci://registry-1.docker.io/posen
+
+# Add images/myFirstImage/ to the configuration
+$ dock image config set images/myFirstImage/
+Set [images/myFirstImage] image-file = Dockerfile
+Set [images/myFirstImage] type = image
+images/myFirstImage:
+- registry: posen
+- image-file: Dockerfile
+- image-name:
+- depends-on:
+- type: image
+
+# Add images/mySecondImage/ to the configuration
+$ dock image config set images/mySecondImage/ --depends-on=images/myFirstImage/
+Set [images/mySecondImage] image-file = Dockerfile
+Set [images/mySecondImage] depends-on = images/myFirstImage
+Set [images/mySecondImage] type = image
+images/mySecondImage:
+- registry: posen
+- image-file: Dockerfile
+- image-name:
+- depends-on: images/myFirstImage
+- type: image
+
+# Add charts/myFirstChart/ to the configuration
+$ dock chart config set charts/myFirstChart/
+Set [charts/myFirstChart] type = chart
+charts/myFirstChart:
+- oci-registry: oci://registry-1.docker.io/posen
+- type: chart
+
+# Add charts/mySecondChart/ to the configuration
+$ dock chart config set charts/mySecondChart/
+Set [charts/mySecondChart] type = chart
+charts/mySecondChart:
+- oci-registry: oci://registry-1.docker.io/posen
+- type: chart
+```
+
 And the content of `dock.ini` is as follows:
 
 ```bash
@@ -48,6 +97,7 @@ type = image
 
 [images/mySecondImage]
 image-file = Dockerfile
+depends-on = images/myFirstImage
 type = image
 
 [charts/myFirstChart]

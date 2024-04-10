@@ -16,6 +16,8 @@ def transform_to_section(ctx, _param, value):
 
 def multiline_values(_ctx, _param, value):
     if isinstance(value, tuple) and value:
+        if len(value) == 1:
+            return value[0]
         return '\n' + '\n'.join(value)
     return value
 

@@ -61,7 +61,6 @@ def image_build(obj, sections, tags):
               help='Specify one or multiple tags for the image')
 def image_push(obj, sections, tags):
     for section in sections:
-        obj.helper.validate_section(section)
         for tag in tags:
             cmd.run([obj.command.docker, 'push', obj.helper.get_image(section, tag)])
 
@@ -73,7 +72,6 @@ def image_push(obj, sections, tags):
               help='Specify one or multiple tags for the image')
 def image_clean(obj, sections, tags):
     for section in sections:
-        obj.helper.validate_section(section)
         for tag in tags:
             cmd.run([obj.command.docker, 'rmi', '--force', obj.helper.get_image(section, tag)])
 
@@ -106,7 +104,7 @@ def config_view(obj):
 @click.option('--name', required=False, type=str,
               help='Name of the image for this section.')
 @click.option('--depends-on', required=False, multiple=True,
-              type=click.Path(exists=True, file_okay=False),
+              type=click.Path(exists=True),
               callback=cb.multiline_sections,
               help='List of sections or paths that this section depends on.')
 def config_set(obj, section, registry, file, name, depends_on):

@@ -66,10 +66,10 @@ class ChartHelper(ConfigHelper):
 
     def validate_section(self, section):
         super().validate_section(section)
-        assert self.get_section_file(section).exists(), (
-               f"File does not exist: {self.get_section_file(section)}.")
         assert self.get_section_type(section) == SectionType.CHART, (
                f"The section '{section}' type should be {SectionType.CHART}.")
+        assert self.get_section_file(section).exists(), (
+               f"File does not exist: {self.get_section_file(section)}.")
         assert self.get_section_registry(section), (
                f"The section '{section}' registry should exist.")
 
@@ -113,10 +113,10 @@ class ImageHelper(ConfigHelper):
 
     def validate_section(self, section):
         super().validate_section(section)
-        assert self.get_section_file(section).exists(), (
-               f"File does not exist: {self.get_section_file(section)}.")
         assert self.get_section_type(section) == SectionType.IMAGE, (
                f"The section '{section}' type should be {SectionType.IMAGE}.")
+        assert self.get_section_file(section).exists(), (
+               f"File does not exist: {self.get_section_file(section)}.")
         assert self.get_section_registry(section), (
                f"The section '{section}' registry should exist.")
 

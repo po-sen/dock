@@ -69,16 +69,30 @@ def test_image_config_set(dock, env, valid_image_section, config_file, mock_upda
     assert f'Set [{valid_image_section.section}] type = image\n' in output
     assert f'{valid_image_section.section}:\n' in output
 
-def test_image_config_set_with_params(dock, env, valid_image_section, config_file, mock_update_config):
+def test_image_config_set_with_params_1(dock, env, valid_image_section, config_file, mock_update_config):
+    path = str(config_file.parent / valid_image_section.section)
+    output = invoke_cli(dock, ['image', 'config', 'set', path,
+                               f'--name={valid_image_section.name}',
+                               f'--depends-on={config_file.parent}/images/image-1/'], env=env)
+    mock_update_config.assert_called_once()
+    assert f'Set [{valid_image_section.section}] type = image\n' in output
+    assert f'Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
+    assert f'Set [{valid_image_section.section}] depends-on = images/image-1\n' in output
+    assert f'{valid_image_section.section}:\n' in output
+
+def test_image_config_set_with_params_2(dock, env, valid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_image_section.section)
     output = invoke_cli(dock, ['image', 'config', 'set', path,
                                '--file=Dockerfile',
                                f'--name={valid_image_section.name}',
                                f'--depends-on={config_file.parent}/images/image-1',
                                f'--depends-on={config_file.parent}/charts/chart-1',
+                               f'--depends-on={config_file.parent}/dock.ini',
                                f'--depends-on={config_file.parent}/.'], env=env)
     mock_update_config.assert_called_once()
     assert f'Set [{valid_image_section.section}] type = image\n' in output
+    assert f'Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
+    assert f'Set [{valid_image_section.section}] depends-on = \nimages/image-1\ncharts/chart-1\ndock.ini\n.\n' in output
     assert f'{valid_image_section.section}:\n' in output
 
 def test_image_config_set_error(dock, env, invalid_image_section, config_file, mock_update_config):

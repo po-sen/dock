@@ -20,6 +20,9 @@ def set_config_option(config, section, option, value=None):
         logging.getLogger(__name__).debug('Setting section [%s] option `%s` to `%s`', section, option, value)
         config.set(section, option, value)
         click.echo(f'Set [{section}] {option} = {value}')
+    else:
+        logging.getLogger(__name__).debug('Skipping section [%s] option `%s` because value was `%s`',
+                                          section, option, value)
 
 def print_image_config(config, section):
     click.echo(f"{click.style(section, fg='bright_cyan')}:")

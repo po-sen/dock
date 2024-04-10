@@ -53,7 +53,7 @@ build-package: init
 	$(VENV)/bin/python3 -m build --outdir $(DIST_DIR);
 
 PHONY += upload-package
-upload-package: init $(DIST_DIR)/*
+upload-package: init
 	@set -euo pipefail; \
 	$(VENV)/bin/pip install -Uq twine; \
 	$(VENV)/bin/python3 -m twine check $(DIST_DIR)/*; \
