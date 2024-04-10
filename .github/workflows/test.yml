@@ -32,9 +32,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      # - name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v3
-      - name: Set up Helm
+      - name: Setup Helm
         uses: azure/setup-helm@v4.1.0
       - name: Initial dock-cli
         run: make clean init list

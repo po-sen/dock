@@ -1,0 +1,24 @@
+name: Publish
+on:
+  release:
+    types:
+      - 'created'
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Initial dock-cli
+        run: make clean init list
+      - name: Build package
+        run: make build-package
+      - name: Upload package
+        run: make upload-package
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
