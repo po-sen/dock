@@ -5,7 +5,7 @@ with open('README.md', encoding='utf-8') as fp:
 
 setup(
     name='dock-cli',
-    version='1.0.0rc0',
+    version='1.0.0',
     author='Posen',
     author_email='posen2101024@gmail.com',
     description='CLI for manage container applications',

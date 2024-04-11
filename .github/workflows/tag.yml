@@ -5,11 +5,13 @@ on:
       - 'setup.py'
     branches:
       - 'master'
+      - '*.x'
   pull_request:
     paths:
       - 'setup.py'
     branches:
       - 'master'
+      - '*.x'
 jobs:
   tag:
     runs-on: ubuntu-latest
