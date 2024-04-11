@@ -41,4 +41,5 @@ jobs:
       - name: Test dock-cli
         run: make test
       - name: Clean dock-cli
+        if: always()
         run: make clean
