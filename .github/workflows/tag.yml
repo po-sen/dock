@@ -34,3 +34,6 @@ jobs:
         run: make push-tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Clean dock-cli
+        if: always()
+        run: make clean
