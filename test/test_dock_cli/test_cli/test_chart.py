@@ -45,20 +45,29 @@ def test_chart_config_view_no_charts(dock, env_dne, mock_update_config):
     mock_update_config.assert_not_called()
     assert output == ''
 
-def test_chart_config_set(dock, env, valid_chart_section, config_file, mock_update_config):
+def test_chart_config_set(dock, env, valid_chart_section, config_file, mock_update_config, mock_click_confirm):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / valid_chart_section.section)
     output = invoke_cli(dock, ['chart', 'config', 'set', path], env=env)
-    mock_update_config.assert_called_once()
+    if mock_click_confirm.return_value:
+        mock_update_config.assert_called_once()
+    else:
+        mock_update_config.assert_not_called()
     assert f'Set [{valid_chart_section.section}] type = chart\n' in output
     assert f'{valid_chart_section.section}:\n' in output
 
-def test_chart_config_set_error(dock, env, invalid_chart_section, config_file, mock_update_config):
+def test_chart_config_set_error(dock, env, invalid_chart_section, config_file, mock_update_config, mock_click_confirm):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / invalid_chart_section.section)
     output = invoke_cli(dock, ['chart', 'config', 'set', path], env=env, expected_exit_code=2)
     mock_update_config.assert_not_called()
+    mock_click_confirm.assert_not_called()
     assert "Error: Invalid value for 'SECTION':" in output
 
-def test_chart_config_set_registry(dock, env, mock_update_config):
+def test_chart_config_set_registry(dock, env, mock_update_config, mock_click_confirm):
     output = invoke_cli(dock, ['chart', 'config', 'set-registry', 'mew'], env=env)
-    mock_update_config.assert_called_once()
+    if mock_click_confirm.return_value:
+        mock_update_config.assert_called_once()
+    else:
+        mock_update_config.assert_not_called()
     assert output.splitlines()[0] == 'Set [DEFAULT] oci-registry = mew'

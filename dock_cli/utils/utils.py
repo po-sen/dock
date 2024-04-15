@@ -21,6 +21,7 @@ def set_config_option(config, section, option, value=None):
         config.set(section, option, value)
         click.echo(f'Set [{section}] {option} = {value}')
     else:
+        click.echo(f'Del [{section}] {option}')
         logging.getLogger(__name__).debug('Skipping section [%s] option `%s` because value was `%s`',
                                           section, option, value)
 

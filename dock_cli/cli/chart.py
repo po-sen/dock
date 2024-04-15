@@ -87,7 +87,8 @@ def config_set(obj, section):
     utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
     obj.helper.validate_section(section)
     utils.print_chart_config(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
+    if click.confirm('Do you want to update the configuration?'):
+        utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='set-registry',
                     help='Set default registry for all charts in the configuration')
@@ -97,4 +98,5 @@ def config_set_registry(obj, registry):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
     for section in obj.helper.get_charts():
         utils.print_chart_config(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
+    if click.confirm('Do you want to update the configuration?'):
+        utils.update_config(obj.config, obj.config_file)

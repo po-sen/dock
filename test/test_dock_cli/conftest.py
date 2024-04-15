@@ -124,6 +124,13 @@ def mock_subprocess_run(mocker):
     mock.return_value = mocker.MagicMock(check_returncode=lambda: None)
     return mock
 
+@pytest.fixture(scope='function',
+                params=[True, False])
+def mock_click_confirm(request, mocker):
+    mock = mocker.patch('click.confirm')
+    mock.return_value = request.param
+    return mock
+
 @pytest.fixture(scope='function')
 def mock_update_config(mocker):
     mock = mocker.patch('dock_cli.utils.utils.update_config')
