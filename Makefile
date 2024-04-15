@@ -18,22 +18,11 @@ $(VENV):
 	@set -euo pipefail; \
 	$(PYTHON) -m venv $(VENV); \
 	$(VENV_PIP) install -Uq pip setuptools wheel; \
-	$(VENV_PIP) install -Uqe .; \
+	$(VENV_PIP) install -Uqe .[test]; \
 	echo -e "Successfully created a new virtualenv $(VENV) in $$PWD";
 
-PHONY += check-python-version
-check-python-version:
-	@set -euo pipefail; \
-	python_version=$$($(PYTHON) --version 2>&1 | awk '{print $$2}'); \
-	major_version=$$(echo $$python_version | cut -d. -f1); \
-	minor_version=$$(echo $$python_version | cut -d. -f2); \
-	if [ $$major_version -lt 3 ] || { [ $$major_version -eq 3 ] && [ $$minor_version -lt 7 ]; }; then \
-		echo "Require Python 3.7 or higher." ; \
-		exit 1; \
-	fi;
-
 PHONY += init
-init: check-python-version $(VENV)
+init: $(VENV)
 
 PHONY += list
 list: init
@@ -41,12 +30,10 @@ list: init
 	$(VENV_PIP) list;
 
 PHONY += test
-test: init .pylintrc test/requirements.txt
+test: init
 	@set -euo pipefail; \
-	$(VENV_PIP) install -Uqr test/requirements.txt; \
-	$(VENV_PIP) list; \
-	$(VENV_PYLINT) $(DOCK_CLI) --rcfile .pylintrc --reports y; \
-	$(VENV_PYTEST) test;
+	$(VENV_PYLINT) $(DOCK_CLI); \
+	$(VENV_PYTEST);
 
 PHONY += clean
 clean:

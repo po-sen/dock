@@ -2,13 +2,13 @@ name: Tag
 on:
   push:
     paths:
-      - 'setup.py'
+      - 'pyproject.toml'
     branches:
       - 'master'
       - '*.x'
   pull_request:
     paths:
-      - 'setup.py'
+      - 'pyproject.toml'
     branches:
       - 'master'
       - '*.x'

@@ -1,0 +1,74 @@
+[project]
+name = "dock-cli"
+version = "1.1.0a1"
+dependencies = [
+  "click~=8.1.7",
+]
+requires-python = ">=3.7"
+authors = [
+  { name = "Posen", email = "posen2101024@gmail.com" },
+]
+description = "CLI for manage container applications"
+readme = "README.md"
+license = { file = "LICENSE" }
+
+[project.optional-dependencies]
+test = [
+  "pylint",
+  "pytest",
+  "pytest-cov",
+  "pytest-mock",
+  "pytest-pylint",
+]
+
+[project.scripts]
+dock = "dock_cli.main:cli"
+
+[project.urls]
+Source = "https://github.com/Posen2101024/dock"
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=61.0",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "if __name__ == .__main__.:",
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = [
+  "C0114", # missing-module-docstring
+  "C0115", # missing-class-docstring
+  "C0116", # missing-function-docstring
+]
+
+[tool.pylint.reports]
+reports = "yes"
+
+[tool.pylint.typecheck]
+signature-mutators = [
+  "click.decorators.option",
+  "click.decorators.argument",
+  "click.decorators.version_option",
+  "click.decorators.help_option",
+  "click.decorators.pass_context",
+  "click.decorators.pass_obj",
+  "click.decorators.confirmation_option",
+]
+
+[tool.pylint.basic]
+good-names = [
+  "fp",
+]
+
+[tool.pytest.ini_options]
+addopts = "-vvs -rxs --tb=short --color=yes --cov=dock_cli --cov-report=term-missing --pylint"
+testpaths = [
+  "test",
+]
