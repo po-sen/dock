@@ -42,13 +42,13 @@ clean:
 PHONY += create-tag
 create-tag: init
 	@set -euo pipefail; \
-	dock_version=$$($(VENV_DOCK) --version | cut -d' ' -f3); \
+	dock_version=$$($(VENV_DOCK) --version); \
 	$(GIT) tag $$dock_version;
 
 PHONY += push-tag
 push-tag: init
 	@set -euo pipefail; \
-	dock_version=$$($(VENV_DOCK) --version | cut -d' ' -f3); \
+	dock_version=$$($(VENV_DOCK) --version); \
 	$(GIT) push origin $$dock_version;
 
 PHONY += build-package
