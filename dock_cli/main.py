@@ -34,7 +34,7 @@ CONTEXT_SETTINGS = {
 @click.option('--git',
               type=click.Path(exists=True, dir_okay=False, executable=True, resolve_path=True),
               help='Path to the Git command.')
-@click.version_option(package_name='dock-cli')
+@click.version_option(package_name='dock-cli', message='%(version)s')
 def cli(ctx, config_file, log_level, docker, helm, git):
     # pylint: disable=too-many-arguments
     logging.basicConfig(level=getattr(logging, log_level.upper()),
