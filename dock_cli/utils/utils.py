@@ -4,9 +4,11 @@ import click
 from dock_cli.utils.schema import ImageConfigOptions as Image, ChartConfigOptions as Chart
 
 def update_config(config, config_file):
-    logging.getLogger(__name__).debug('Updating configuration to %s', config_file)
-    with open(config_file, 'w', encoding='utf-8') as fp:
-        config.write(fp)
+    if click.confirm('Do you want to update the configuration?'):
+        logging.getLogger(__name__).debug('Updating configuration to %s', config_file)
+        with open(config_file, 'w', encoding='utf-8') as fp:
+            config.write(fp)
+        click.echo('  Successfully updated.')
 
 def to_section(config_dir, value):
     section = pathlib.Path(value).resolve().relative_to(config_dir).as_posix()
@@ -19,9 +21,9 @@ def set_config_option(config, section, option, value=None):
     if value:
         logging.getLogger(__name__).debug('Setting section [%s] option `%s` to `%s`', section, option, value)
         config.set(section, option, value)
-        click.echo(f'Set [{section}] {option} = {value}')
+        click.echo(f"{click.style(f'Set [{section}] {option} = {value}', fg='green')}")
     else:
-        click.echo(f'Del [{section}] {option}')
+        click.echo(f"{click.style(f'Del [{section}] {option}', fg='red')}")
         logging.getLogger(__name__).debug('Skipping section [%s] option `%s` because value was `%s`',
                                           section, option, value)
 

@@ -1,5 +1,6 @@
 import dataclasses
 import functools
+import logging
 import pathlib
 import re
 import click
@@ -36,15 +37,21 @@ class ConfigHelper():
     def get_section_path(self, section):
         return self.config_dir / pathlib.Path(section)
 
-    def validate_section(self, section):
+    def _validate_section(self, section):
         assert section in self.config, (
-               f"The section '{section}' is not in the configuration.")
+               f'The section [{section}] is not in the configuration.')
         assert not pathlib.Path(section).is_absolute(), (
-               f"The section '{section}' should be a relative path.")
+               f'The section [{section}] should be a relative path.')
+
+    def validate_section(self, section, exception=click.ClickException):
+        try:
+            self._validate_section(section)
+        except AssertionError as err:
+            raise exception(err) from err
 
     def is_valid_section(self, section):
         try:
-            self.validate_section(section)
+            self._validate_section(section)
         except AssertionError:
             return False
         return True
@@ -64,14 +71,14 @@ class ChartHelper(ConfigHelper):
     def get_section_registry(self, section):
         return self.config.get(section, Chart.REGISTRY, fallback='')
 
-    def validate_section(self, section):
-        super().validate_section(section)
+    def _validate_section(self, section):
+        super()._validate_section(section)
         assert self.get_section_type(section) == SectionType.CHART, (
-               f"The section '{section}' type should be {SectionType.CHART}.")
+               f'The section [{section}] type should be {SectionType.CHART}.')
         assert self.get_section_file(section).exists(), (
-               f"File does not exist: {self.get_section_file(section)}.")
+               f'File does not exist: {self.get_section_file(section)}.')
         assert self.get_section_registry(section), (
-               f"The section '{section}' registry should exist.")
+               f'The section [{section}] registry should exist.')
 
     def get_chart_info(self, section):
         return cmd.getoutput([self.command.helm, 'show', 'chart', self.get_section_path(section)])
@@ -86,7 +93,10 @@ class ChartHelper(ConfigHelper):
         return f'{self.get_section_registry(section)}/{self.get_chart_name(section)}'
 
     def get_charts(self):
-        return [section for section in self.config.sections() if self.is_valid_section(section)]
+        sections = [section for section in self.config.sections() if self.is_valid_section(section)]
+        if not sections:
+            logging.getLogger(__name__).info('No charts found.')
+        return sections
 
     def get_updated_charts(self, commit1, commit2):
         return [section for section in self.get_charts() if self.is_updated_section(section, commit1, commit2)]
@@ -111,21 +121,23 @@ class ImageHelper(ConfigHelper):
     def get_section_registry(self, section):
         return self.config.get(section, Image.REGISTRY, fallback='')
 
-    def validate_section(self, section):
-        super().validate_section(section)
+    def _validate_section(self, section):
+        super()._validate_section(section)
         assert self.get_section_type(section) == SectionType.IMAGE, (
-               f"The section '{section}' type should be {SectionType.IMAGE}.")
+               f'The section [{section}] type should be {SectionType.IMAGE}.')
         assert self.get_section_file(section).exists(), (
-               f"File does not exist: {self.get_section_file(section)}.")
+               f'File does not exist: {self.get_section_file(section)}.')
         assert self.get_section_registry(section), (
-               f"The section '{section}' registry should exist.")
+               f'The section [{section}] registry should exist.')
 
     def get_image(self, section, image_tag):
         return f'{self.get_section_registry(section)}/{self.get_section_name(section)}:{image_tag}'
 
     def get_images(self):
-        return topological_sort({section: set(self.get_section_dependencies(section))
-                                 for section in self.config.sections() if self.is_valid_section(section)})
+        sections = [section for section in self.config.sections() if self.is_valid_section(section)]
+        if not sections:
+            logging.getLogger(__name__).info('No images found.')
+        return topological_sort({section: set(self.get_section_dependencies(section)) for section in sections})
 
     def get_updated_images(self, commit1, commit2):
         return [section for section in self.get_images() if self.is_updated_section(section, commit1, commit2)

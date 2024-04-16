@@ -70,9 +70,6 @@ def config_cli():
                     help="View current charts' configuration")
 @click.pass_obj
 def config_view(obj):
-    sections = obj.helper.get_charts()
-    if not sections:
-        logging.getLogger(__name__).warning('No charts found.')
     for section in obj.helper.get_charts():
         utils.print_chart_config(obj.config, section)
 
@@ -81,14 +78,21 @@ def config_view(obj):
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
-def config_set(obj, section):
+@click.option('--registry', required=False, type=str,
+              help='Name of the registry for this section.')
+def config_set(obj, section, registry):
+    if not obj.config.has_option(configparser.DEFAULTSECT, Chart.REGISTRY):
+        logging.getLogger(__name__).warning(
+            "Recommended to set the default registry with 'dock chart config set-registry' first")
     if obj.config.has_section(section) is False:
         obj.config.add_section(section)
+    utils.set_config_option(obj.config, section, Chart.REGISTRY, registry)
     utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
-    obj.helper.validate_section(section)
+    click.echo()
     utils.print_chart_config(obj.config, section)
-    if click.confirm('Do you want to update the configuration?'):
-        utils.update_config(obj.config, obj.config_file)
+    click.echo()
+    obj.helper.validate_section(section)
+    utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='set-registry',
                     help='Set default registry for all charts in the configuration')
@@ -96,7 +100,5 @@ def config_set(obj, section):
 @click.argument('registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
 def config_set_registry(obj, registry):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
-    for section in obj.helper.get_charts():
-        utils.print_chart_config(obj.config, section)
-    if click.confirm('Do you want to update the configuration?'):
-        utils.update_config(obj.config, obj.config_file)
+    click.echo()
+    utils.update_config(obj.config, obj.config_file)

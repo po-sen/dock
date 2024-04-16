@@ -1,11 +1,15 @@
 from dock_cli.utils.utils import update_config, topological_sort
 
 
-def test_update_config(mocker, mock_config_open, config_file):
+def test_update_config(mocker, config_file, mock_config_open, mock_click_confirm):
     mock_config = mocker.Mock()
     update_config(mock_config, config_file)
-    mock_config_open.assert_called_once_with(config_file, 'w', encoding='utf-8')
-    mock_config.write.assert_called_once()
+    if mock_click_confirm.return_value:
+        mock_config_open.assert_called_once_with(config_file, 'w', encoding='utf-8')
+        mock_config.write.assert_called_once()
+    else:
+        mock_config_open.assert_not_called()
+        mock_config.write.assert_not_called()
 
 
 class TestTopologicalSort():

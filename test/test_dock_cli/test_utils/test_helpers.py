@@ -1,3 +1,4 @@
+import click
 import pytest
 from dock_cli.utils.schema import SectionType
 
@@ -19,9 +20,17 @@ class TestChartHelper():
         assert result is None
 
     def test_validate_section_error(self, chart_helper, invalid_chart_section):
-        with pytest.raises(AssertionError) as excinfo:
+        with pytest.raises(click.ClickException) as excinfo:
             chart_helper.validate_section(invalid_chart_section.section)
-        assert str(excinfo.value) == f"The section '{invalid_chart_section.section}' is not in the configuration."
+        assert str(excinfo.value.message) == (
+               f'The section [{invalid_chart_section.section}] is not in the configuration.')
+
+    def test_protected_validate_section_error(self, chart_helper, invalid_chart_section):
+        # pylint: disable=protected-access
+        with pytest.raises(AssertionError) as excinfo:
+            chart_helper._validate_section(invalid_chart_section.section)
+        assert str(excinfo.value) == (
+               f'The section [{invalid_chart_section.section}] is not in the configuration.')
 
     def test_get_section_file(self, chart_helper, chart_section, config_file):
         result = chart_helper.get_section_file(chart_section.section)
@@ -84,9 +93,17 @@ class TestImageHelper():
         assert result is None
 
     def test_validate_section_error(self, image_helper, invalid_image_section):
-        with pytest.raises(AssertionError) as excinfo:
+        with pytest.raises(click.ClickException) as excinfo:
             image_helper.validate_section(invalid_image_section.section)
-        assert str(excinfo.value) == f"The section '{invalid_image_section.section}' is not in the configuration."
+        assert str(excinfo.value.message) == (
+               f'The section [{invalid_image_section.section}] is not in the configuration.')
+
+    def test_protected_validate_section_error(self, image_helper, invalid_image_section):
+        # pylint: disable=protected-access
+        with pytest.raises(AssertionError) as excinfo:
+            image_helper._validate_section(invalid_image_section.section)
+        assert str(excinfo.value) == (
+               f'The section [{invalid_image_section.section}] is not in the configuration.')
 
     def test_get_section_file(self, image_helper, image_section, config_file):
         result = image_helper.get_section_file(image_section.section)

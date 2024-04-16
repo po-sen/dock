@@ -86,10 +86,7 @@ def config_cli():
                     help="View current images' configuration")
 @click.pass_obj
 def config_view(obj):
-    sections = obj.helper.get_images()
-    if not sections:
-        logging.getLogger(__name__).warning('No images found.')
-    for section in sections:
+    for section in obj.helper.get_images():
         utils.print_image_config(obj.config, section)
 
 @config_cli.command(name='set',
@@ -109,6 +106,9 @@ def config_view(obj):
               help='List of sections or paths that this section depends on.')
 def config_set(obj, section, registry, image_file, image_name, depends_on):
     # pylint: disable=too-many-arguments
+    if not obj.config.has_option(configparser.DEFAULTSECT, Image.REGISTRY):
+        logging.getLogger(__name__).warning(
+            "Recommended to set the default registry with 'dock image config set-registry' first")
     if obj.config.has_section(section) is False:
         obj.config.add_section(section)
     utils.set_config_option(obj.config, section, Image.REGISTRY, registry)
@@ -116,10 +116,11 @@ def config_set(obj, section, registry, image_file, image_name, depends_on):
     utils.set_config_option(obj.config, section, Image.NAME, image_name)
     utils.set_config_option(obj.config, section, Image.DEPENDS_ON, depends_on)
     utils.set_config_option(obj.config, section, Image.TYPE, SectionType.IMAGE)
-    obj.helper.validate_section(section)
+    click.echo()
     utils.print_image_config(obj.config, section)
-    if click.confirm('Do you want to update the configuration?'):
-        utils.update_config(obj.config, obj.config_file)
+    click.echo()
+    obj.helper.validate_section(section)
+    utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='set-registry',
                     help='Set default registry for all images in the configuration')
@@ -127,7 +128,5 @@ def config_set(obj, section, registry, image_file, image_name, depends_on):
 @click.argument('registry', required=False, type=str, default='namespace')
 def config_set_registry(obj, registry):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
-    for section in obj.helper.get_images():
-        utils.print_image_config(obj.config, section)
-    if click.confirm('Do you want to update the configuration?'):
-        utils.update_config(obj.config, obj.config_file)
+    click.echo()
+    utils.update_config(obj.config, obj.config_file)

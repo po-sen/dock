@@ -1,5 +1,6 @@
 import configparser
 import logging
+import os
 import pathlib
 import types
 import click
@@ -44,6 +45,8 @@ def cli(ctx, config_file, log_level, docker, helm, git):
     ctx.obj.command = hlp.Command(docker, helm, git)
 
     logging.getLogger(__name__).debug('Reading configuration from %s', config_file)
+    if not os.path.exists(config_file):
+        logging.getLogger(__name__).warning("Configuration file '%s' does not exist.", config_file)
     ctx.obj.config = configparser.ConfigParser()
     ctx.obj.config.read(config_file)
     ctx.obj.config_dir = pathlib.Path(config_file).parent.as_posix()

@@ -4,6 +4,7 @@ from helpers import ChartSection, ImageSection
 from dock_cli.main import cli
 
 CONFIG_FILE = pathlib.Path(__file__).resolve().parent.parent / 'dummy_repo' / 'dock.ini'
+CONFIG_FILE_INIT = pathlib.Path(__file__).resolve().parent.parent / 'dummy_repo' / 'dock-does-not-exist.ini'
 
 CONFIG_CHART_SECTIONS = [
     ChartSection('charts/chart-1', 'chart-1'),
@@ -51,6 +52,10 @@ def help_option(request):
 @pytest.fixture(scope='function')
 def config_file():
     return CONFIG_FILE
+
+@pytest.fixture(scope='function')
+def config_file_init():
+    return CONFIG_FILE_INIT
 
 @pytest.fixture(scope='function',
                 params=CONFIG_CHART_SECTIONS,

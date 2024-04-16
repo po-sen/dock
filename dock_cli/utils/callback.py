@@ -1,12 +1,13 @@
 import functools
+import click
 from dock_cli.utils import utils
 
 def validate_section(ctx, _param, value):
     if isinstance(value, tuple):
         for section in value:
-            ctx.obj.helper.validate_section(section)
+            ctx.obj.helper.validate_section(section, click.BadArgumentUsage)
     if isinstance(value, str):
-        ctx.obj.helper.validate_section(value)
+        ctx.obj.helper.validate_section(value, click.BadArgumentUsage)
     return value
 
 def transform_to_section(ctx, _param, value):
