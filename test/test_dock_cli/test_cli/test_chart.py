@@ -52,6 +52,15 @@ def test_chart_config_set(dock, env, valid_chart_section, config_file, mock_upda
     assert f'Set [{valid_chart_section.section}] type = chart\n' in output
     assert f'{valid_chart_section.section}:\n' in output
 
+def test_image_config_set_with_params(dock, env, valid_chart_section, config_file, mock_update_config):
+    path = str(config_file.parent / valid_chart_section.section)
+    output = invoke_cli(dock, ['chart', 'config', 'set', path,
+                               '--registry=namespace'], env=env)
+    mock_update_config.assert_called_once()
+    assert f'Set [{valid_chart_section.section}] type = chart\n' in output
+    assert f'Set [{valid_chart_section.section}] oci-registry = namespace\n' in output
+    assert f'{valid_chart_section.section}:\n' in output
+
 def test_chart_config_set_error(dock, env, invalid_chart_section, config_file, mock_update_config):
     path = str(config_file.parent / invalid_chart_section.section)
     output = invoke_cli(dock, ['chart', 'config', 'set', path], env=env, expected_exit_code=2)

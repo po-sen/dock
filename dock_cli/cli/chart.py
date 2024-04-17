@@ -73,7 +73,7 @@ def config_view(obj):
     sections = obj.helper.get_charts()
     if not sections:
         logging.getLogger(__name__).warning('No charts found.')
-    for section in obj.helper.get_charts():
+    for section in sections:
         utils.print_chart_config(obj.config, section)
 
 @config_cli.command(name='set',
@@ -81,9 +81,12 @@ def config_view(obj):
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
-def config_set(obj, section):
+@click.option('--registry', required=False, type=str,
+              help='Name of the registry for this section.')
+def config_set(obj, section, registry):
     if obj.config.has_section(section) is False:
         obj.config.add_section(section)
+    utils.set_config_option(obj.config, section, Chart.REGISTRY, registry)
     utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
     obj.helper.validate_section(section)
     utils.print_chart_config(obj.config, section)
