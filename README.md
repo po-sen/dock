@@ -47,8 +47,12 @@ Set [DEFAULT] oci-registry = oci://registry-1.docker.io/posen
 
 # Add images/myFirstImage/ to the configuration
 $ dock image config set images/myFirstImage/
+Del [images/myFirstImage] registry
 Set [images/myFirstImage] image-file = Dockerfile
+Del [images/myFirstImage] image-name
+Del [images/myFirstImage] depends-on
 Set [images/myFirstImage] type = image
+
 images/myFirstImage:
 - registry: posen
 - image-file: Dockerfile
@@ -58,9 +62,12 @@ images/myFirstImage:
 
 # Add images/mySecondImage/ to the configuration
 $ dock image config set images/mySecondImage/ --depends-on=images/myFirstImage/
+Del [images/mySecondImage] registry
 Set [images/mySecondImage] image-file = Dockerfile
+Del [images/mySecondImage] image-name
 Set [images/mySecondImage] depends-on = images/myFirstImage
 Set [images/mySecondImage] type = image
+
 images/mySecondImage:
 - registry: posen
 - image-file: Dockerfile
@@ -70,14 +77,18 @@ images/mySecondImage:
 
 # Add charts/myFirstChart/ to the configuration
 $ dock chart config set charts/myFirstChart/
+Del [charts/myFirstChart] oci-registry
 Set [charts/myFirstChart] type = chart
+
 charts/myFirstChart:
 - oci-registry: oci://registry-1.docker.io/posen
 - type: chart
 
 # Add charts/mySecondChart/ to the configuration
 $ dock chart config set charts/mySecondChart/
+Del [charts/mySecondChart] oci-registry
 Set [charts/mySecondChart] type = chart
+
 charts/mySecondChart:
 - oci-registry: oci://registry-1.docker.io/posen
 - type: chart
@@ -128,3 +139,8 @@ Then you can use the following command to push to the registry:
     $ dock image list | xargs -r dock image push
     $ dock chart list | xargs -r dock chart push
     ```
+
+## Links
+
+- Source: https://github.com/Posen2101024/dock
+- PyPI: https://pypi.org/project/dock-cli/
