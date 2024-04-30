@@ -1,10 +1,10 @@
 [project]
 name = "dock-cli"
-version = "1.1.0"
+version = "1.2.0a0"
 dependencies = [
   "click~=8.1.7",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 authors = [
   { name = "Posen", email = "posen2101024@gmail.com" },
 ]
@@ -60,11 +60,6 @@ signature-mutators = [
   "click.decorators.pass_context",
   "click.decorators.pass_obj",
   "click.decorators.confirmation_option",
-]
-
-[tool.pylint.basic]
-good-names = [
-  "fp",
 ]
 
 [tool.pytest.ini_options]

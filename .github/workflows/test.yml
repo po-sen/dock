@@ -21,7 +21,6 @@ jobs:
           - {name: 'Python 3.10', python: '3.10', os: ubuntu-latest}
           - {name: 'Python 3.9', python: '3.9', os: ubuntu-latest}
           - {name: 'Python 3.8', python: '3.8', os: ubuntu-latest}
-          - {name: 'Python 3.7', python: '3.7', os: ubuntu-latest}
           - {name: 'PyPy 3.10', python: 'pypy3.10', os: ubuntu-latest}
           - {name: 'PyPy 3.9', python: 'pypy3.9', os: ubuntu-latest}
           - {name: 'macOS', python: '3.12', os: macos-latest}

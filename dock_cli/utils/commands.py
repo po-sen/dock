@@ -2,7 +2,7 @@ import functools
 import logging
 import subprocess
 
-def _validate_args(func):
+def _validate_args(func, /):
     @functools.wraps(func)
     def wrapper(args):
         if not isinstance(args, list):
