@@ -66,16 +66,14 @@ def test_image_config_set(dock, env, valid_image_section, config_file, mock_upda
     path = str(config_file.parent / valid_image_section.section)
     output = invoke_cli(dock, ['image', 'config', 'set', path], env=env)
     mock_update_config.assert_called_once()
-    assert f'Set [{valid_image_section.section}] type = image\n' in output
-    assert f'{valid_image_section.section}:\n' in output
+    assert f'  Set [{valid_image_section.section}] type = image\n' in output
 
-def test_image_config_set_without_config(dock, env_init, valid_image_section, config_file, mock_update_config):
+def test_image_config_set_without_config_file(dock, env_init, valid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_image_section.section)
     output = invoke_cli(dock, ['image', 'config', 'set', path, '--registry=namespace'], env=env_init)
     mock_update_config.assert_called_once()
-    assert f'Set [{valid_image_section.section}] type = image\n' in output
-    assert f'Set [{valid_image_section.section}] registry = namespace\n' in output
-    assert f'{valid_image_section.section}:\n' in output
+    assert f'  Set [{valid_image_section.section}] type = image\n' in output
+    assert f'  Set [{valid_image_section.section}] registry = namespace\n' in output
 
 def test_image_config_set_with_params_1(dock, env, valid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_image_section.section)
@@ -83,10 +81,9 @@ def test_image_config_set_with_params_1(dock, env, valid_image_section, config_f
                                f'--image-name={valid_image_section.name}',
                                f'--depends-on={config_file.parent}/images/image-1/'], env=env)
     mock_update_config.assert_called_once()
-    assert f'Set [{valid_image_section.section}] type = image\n' in output
-    assert f'Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
-    assert f'Set [{valid_image_section.section}] depends-on = images/image-1\n' in output
-    assert f'{valid_image_section.section}:\n' in output
+    assert f'  Set [{valid_image_section.section}] type = image\n' in output
+    assert f'  Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
+    assert f'  Set [{valid_image_section.section}] depends-on = images/image-1\n' in output
 
 def test_image_config_set_with_params_2(dock, env, valid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_image_section.section)
@@ -94,17 +91,15 @@ def test_image_config_set_with_params_2(dock, env, valid_image_section, config_f
                                '--image-file=Dockerfile',
                                '--registry=namespace',
                                f'--image-name={valid_image_section.name}',
-                               f'--depends-on={config_file.parent}/images/image-1',
                                f'--depends-on={config_file.parent}/charts/chart-1',
                                f'--depends-on={config_file.parent}/dock.ini',
                                f'--depends-on={config_file.parent}/.'], env=env)
     mock_update_config.assert_called_once()
-    assert f'Set [{valid_image_section.section}] type = image\n' in output
-    assert f'Set [{valid_image_section.section}] registry = namespace\n' in output
-    assert f'Set [{valid_image_section.section}] image-file = Dockerfile\n' in output
-    assert f'Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
-    assert f'Set [{valid_image_section.section}] depends-on = \nimages/image-1\ncharts/chart-1\ndock.ini\n.\n' in output
-    assert f'{valid_image_section.section}:\n' in output
+    assert f'  Set [{valid_image_section.section}] type = image\n' in output
+    assert f'  Set [{valid_image_section.section}] registry = namespace\n' in output
+    assert f'  Set [{valid_image_section.section}] image-file = Dockerfile\n' in output
+    assert f'  Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
+    assert f'  Set [{valid_image_section.section}] depends-on = \ncharts/chart-1\ndock.ini\n.\n' in output
 
 def test_image_config_set_error(dock, env, invalid_image_section, config_file, mock_update_config):
     # pylint: disable=too-many-arguments
@@ -113,7 +108,18 @@ def test_image_config_set_error(dock, env, invalid_image_section, config_file, m
     mock_update_config.assert_not_called()
     assert "Error: Invalid value for 'SECTION':" in output
 
+def test_image_config_unset(dock, env, image_section, mock_update_config):
+    output = invoke_cli(dock, ['image', 'config', 'unset', image_section.section], env=env)
+    mock_update_config.assert_called_once()
+    assert f'  Unset [{image_section.section}]' in output
+
+def test_image_config_unset_error(dock, env, invalid_image_section, mock_update_config):
+    output = invoke_cli(dock, ['image', 'config', 'unset', invalid_image_section.section],
+                        env=env, expected_exit_code=2)
+    mock_update_config.assert_not_called()
+    assert f'Error: The section [{invalid_image_section.section}] is not in the configuration.' in output
+
 def test_image_config_set_registry(dock, env, mock_update_config):
     output = invoke_cli(dock, ['image', 'config', 'set-registry', 'mew'], env=env)
     mock_update_config.assert_called_once()
-    assert output.splitlines()[0] == 'Set [DEFAULT] registry = mew'
+    assert output.splitlines()[0] == '  Set [DEFAULT] registry = mew'

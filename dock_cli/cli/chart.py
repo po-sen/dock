@@ -81,17 +81,23 @@ def config_view(obj):
 @click.option('--registry', required=False, type=str,
               help='Name of the registry for this section.')
 def config_set(obj, section, registry):
-    if not obj.config.has_option(configparser.DEFAULTSECT, Chart.REGISTRY):
-        logging.getLogger(__name__).warning(
-            "Recommended to set the default registry with 'dock chart config set-registry' first")
-    if obj.config.has_section(section) is False:
-        obj.config.add_section(section)
+    utils.set_config_section(obj.config, section)
     utils.set_config_option(obj.config, section, Chart.REGISTRY, registry)
     utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
-    click.echo()
-    utils.print_chart_config(obj.config, section)
-    click.echo()
+    if not obj.config.has_option(configparser.DEFAULTSECT, Chart.REGISTRY):
+        logging.getLogger(__name__).warning(
+            "Recommended to set the default registry with 'dock chart config set-registry' first.")
     obj.helper.validate_section(section)
+    utils.update_config(obj.config, obj.config_file)
+
+@config_cli.command(name='unset',
+                    help='Remove an chart section in the configuration')
+@click.pass_obj
+@click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
+def config_unset(obj, sections):
+    # pylint: disable=duplicate-code
+    for section in sections:
+        utils.unset_config_section(obj.config, section)
     utils.update_config(obj.config, obj.config_file)
 
 @config_cli.command(name='set-registry',
@@ -100,5 +106,4 @@ def config_set(obj, section, registry):
 @click.argument('registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
 def config_set_registry(obj, registry):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
-    click.echo()
     utils.update_config(obj.config, obj.config_file)

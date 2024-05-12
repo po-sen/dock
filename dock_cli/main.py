@@ -22,7 +22,7 @@ CONTEXT_SETTINGS = {
               show_default=True,
               help='Path to the configuration file.')
 @click.option('-l', '--log-level',
-              type=click.Choice(['debug', 'info', 'warning', 'error', 'fatal'], case_sensitive=False),
+              type=click.Choice(['debug', 'info', 'warning', 'error'], case_sensitive=False),
               default='info',
               show_default=True,
               help='Set the logging level.')
@@ -42,7 +42,7 @@ def cli(ctx, config_file, log_level, docker, helm, git):
                         format='[%(levelname)s] %(message)s')
 
     ctx.ensure_object(types.SimpleNamespace)
-    ctx.obj.command = hlp.Command(docker, helm, git)
+    ctx.obj.command = hlp.Command(docker=docker, helm=helm, git=git)
 
     logging.getLogger(__name__).debug('Reading configuration from %s', config_file)
     if not os.path.exists(config_file):

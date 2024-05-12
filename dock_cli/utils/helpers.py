@@ -74,11 +74,11 @@ class ChartHelper(ConfigHelper):
     def _validate_section(self, section):
         super()._validate_section(section)
         assert self.get_section_type(section) == SectionType.CHART, (
-               f'The section [{section}] type should be {SectionType.CHART}.')
+               f"The section [{section}] option 'type' should be {SectionType.CHART}.")
         assert self.get_section_file(section).exists(), (
                f'File does not exist: {self.get_section_file(section)}.')
         assert self.get_section_registry(section), (
-               f'The section [{section}] registry should exist.')
+               f"The section [{section}] option 'registry' should exist.")
 
     def get_chart_info(self, section):
         return cmd.getoutput([self.command.helm, 'show', 'chart', self.get_section_path(section)])
@@ -124,11 +124,11 @@ class ImageHelper(ConfigHelper):
     def _validate_section(self, section):
         super()._validate_section(section)
         assert self.get_section_type(section) == SectionType.IMAGE, (
-               f'The section [{section}] type should be {SectionType.IMAGE}.')
+               f"The section [{section}] option 'type' should be {SectionType.IMAGE}.")
         assert self.get_section_file(section).exists(), (
                f'File does not exist: {self.get_section_file(section)}.')
         assert self.get_section_registry(section), (
-               f'The section [{section}] registry should exist.')
+               f"The section [{section}] option 'registry' should exist.")
 
     def get_image(self, section, image_tag):
         return f'{self.get_section_registry(section)}/{self.get_section_name(section)}:{image_tag}'

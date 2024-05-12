@@ -49,25 +49,22 @@ def test_chart_config_set(dock, env, valid_chart_section, config_file, mock_upda
     path = str(config_file.parent / valid_chart_section.section)
     output = invoke_cli(dock, ['chart', 'config', 'set', path], env=env)
     mock_update_config.assert_called_once()
-    assert f'Set [{valid_chart_section.section}] type = chart\n' in output
-    assert f'{valid_chart_section.section}:\n' in output
+    assert f'  Set [{valid_chart_section.section}] type = chart\n' in output
 
 def test_chart_config_set_without_config(dock, env_init, valid_chart_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_chart_section.section)
     output = invoke_cli(dock, ['chart', 'config', 'set', path, '--registry=namespace'], env=env_init)
     mock_update_config.assert_called_once()
-    assert f'Set [{valid_chart_section.section}] type = chart\n' in output
-    assert f'Set [{valid_chart_section.section}] oci-registry = namespace\n' in output
-    assert f'{valid_chart_section.section}:\n' in output
+    assert f'  Set [{valid_chart_section.section}] type = chart\n' in output
+    assert f'  Set [{valid_chart_section.section}] oci-registry = namespace\n' in output
 
 def test_image_config_set_with_params(dock, env, valid_chart_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_chart_section.section)
     output = invoke_cli(dock, ['chart', 'config', 'set', path,
                                '--registry=namespace'], env=env)
     mock_update_config.assert_called_once()
-    assert f'Set [{valid_chart_section.section}] type = chart\n' in output
-    assert f'Set [{valid_chart_section.section}] oci-registry = namespace\n' in output
-    assert f'{valid_chart_section.section}:\n' in output
+    assert f'  Set [{valid_chart_section.section}] type = chart\n' in output
+    assert f'  Set [{valid_chart_section.section}] oci-registry = namespace\n' in output
 
 def test_chart_config_set_error(dock, env, invalid_chart_section, config_file, mock_update_config):
     path = str(config_file.parent / invalid_chart_section.section)
@@ -75,7 +72,18 @@ def test_chart_config_set_error(dock, env, invalid_chart_section, config_file, m
     mock_update_config.assert_not_called()
     assert "Error: Invalid value for 'SECTION':" in output
 
+def test_chart_config_unset(dock, env, chart_section, mock_update_config):
+    output = invoke_cli(dock, ['chart', 'config', 'unset', chart_section.section], env=env)
+    mock_update_config.assert_called_once()
+    assert f'  Unset [{chart_section.section}]' in output
+
+def test_chart_config_unset_error(dock, env, invalid_chart_section, mock_update_config):
+    output = invoke_cli(dock, ['chart', 'config', 'unset', invalid_chart_section.section],
+                        env=env, expected_exit_code=2)
+    mock_update_config.assert_not_called()
+    assert f'Error: The section [{invalid_chart_section.section}] is not in the configuration.' in output
+
 def test_chart_config_set_registry(dock, env, mock_update_config):
     output = invoke_cli(dock, ['chart', 'config', 'set-registry', 'mew'], env=env)
     mock_update_config.assert_called_once()
-    assert output.splitlines()[0] == 'Set [DEFAULT] oci-registry = mew'
+    assert output.splitlines()[0] == '  Set [DEFAULT] oci-registry = mew'
