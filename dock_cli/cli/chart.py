@@ -73,6 +73,14 @@ def config_view(obj):
     for section in obj.helper.get_charts():
         utils.print_chart_config(obj.config, section)
 
+@config_cli.command(name='set-registry',
+                    help='Set default registry for all charts in the configuration')
+@click.pass_obj
+@click.argument('registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
+def config_set_registry(obj, registry):
+    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
+    utils.update_config(obj.config, obj.config_file)
+
 @config_cli.command(name='set',
                     help='Add or update an chart section in the configuration')
 @click.pass_obj
@@ -98,12 +106,4 @@ def config_unset(obj, sections):
     # pylint: disable=duplicate-code
     for section in sections:
         utils.unset_config_section(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
-
-@config_cli.command(name='set-registry',
-                    help='Set default registry for all charts in the configuration')
-@click.pass_obj
-@click.argument('registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
-def config_set_registry(obj, registry):
-    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
     utils.update_config(obj.config, obj.config_file)

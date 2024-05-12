@@ -89,6 +89,14 @@ def config_view(obj):
     for section in obj.helper.get_images():
         utils.print_image_config(obj.config, section)
 
+@config_cli.command(name='set-registry',
+                    help='Set default registry for all images in the configuration')
+@click.pass_obj
+@click.argument('registry', required=False, type=str, default='namespace')
+def config_set_registry(obj, registry):
+    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
+    utils.update_config(obj.config, obj.config_file)
+
 @config_cli.command(name='set',
                     help='Add or update an image section in the configuration')
 @click.pass_obj
@@ -126,12 +134,4 @@ def config_unset(obj, sections):
     # pylint: disable=duplicate-code
     for section in sections:
         utils.unset_config_section(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
-
-@config_cli.command(name='set-registry',
-                    help='Set default registry for all images in the configuration')
-@click.pass_obj
-@click.argument('registry', required=False, type=str, default='namespace')
-def config_set_registry(obj, registry):
-    utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
     utils.update_config(obj.config, obj.config_file)

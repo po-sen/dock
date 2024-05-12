@@ -62,6 +62,11 @@ def test_image_config_view_no_images(dock, env_init, mock_update_config):
     mock_update_config.assert_not_called()
     assert output == ''
 
+def test_image_config_set_registry(dock, env, mock_update_config):
+    output = invoke_cli(dock, ['image', 'config', 'set-registry', 'mew'], env=env)
+    mock_update_config.assert_called_once()
+    assert output.splitlines()[0] == '  Set [DEFAULT] registry = mew'
+
 def test_image_config_set(dock, env, valid_image_section, config_file, mock_update_config):
     path = str(config_file.parent / valid_image_section.section)
     output = invoke_cli(dock, ['image', 'config', 'set', path], env=env)
@@ -118,8 +123,3 @@ def test_image_config_unset_error(dock, env, invalid_image_section, mock_update_
                         env=env, expected_exit_code=2)
     mock_update_config.assert_not_called()
     assert f'Error: The section [{invalid_image_section.section}] is not in the configuration.' in output
-
-def test_image_config_set_registry(dock, env, mock_update_config):
-    output = invoke_cli(dock, ['image', 'config', 'set-registry', 'mew'], env=env)
-    mock_update_config.assert_called_once()
-    assert output.splitlines()[0] == '  Set [DEFAULT] registry = mew'
