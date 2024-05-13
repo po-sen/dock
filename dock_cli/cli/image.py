@@ -75,30 +75,23 @@ def image_clean(obj, sections, tags):
         for tag in tags:
             cmd.run([obj.command.docker, 'rmi', '--force', obj.helper.get_image(section, tag)])
 
-@cli.group(name='config', cls=hlp.OrderedGroup)
-def config_cli():
-    """Manage images' configuration
-
-    This is a command line interface for manage images' configuration
-    """
-
-@config_cli.command(name='view',
-                    help="View current images' configuration")
+@cli.command(name='view',
+             help="View current images' configuration")
 @click.pass_obj
 def config_view(obj):
     for section in obj.helper.get_images():
         utils.print_image_config(obj.config, section)
 
-@config_cli.command(name='set-registry',
-                    help='Set default registry for all images in the configuration')
+@cli.command(name='set-registry',
+             help='Set default registry for all images in the configuration')
 @click.pass_obj
 @click.argument('registry', required=False, type=str, default='namespace')
 def config_set_registry(obj, registry):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
     utils.update_config(obj.config, obj.config_file)
 
-@config_cli.command(name='set',
-                    help='Add or update an image section in the configuration')
+@cli.command(name='set',
+             help='Add or update an image section in the configuration')
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
@@ -126,8 +119,8 @@ def config_set(obj, section, registry, image_file, image_name, depends_on):
     obj.helper.validate_section(section)
     utils.update_config(obj.config, obj.config_file)
 
-@config_cli.command(name='unset',
-                    help='Remove an image section in the configuration')
+@cli.command(name='unset',
+             help='Remove an image section in the configuration')
 @click.pass_obj
 @click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
 def config_unset(obj, sections):

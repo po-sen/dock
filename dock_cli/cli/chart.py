@@ -59,30 +59,23 @@ def chart_push(obj, sections, destination):
                  obj.helper.get_chart_archive_file(section, destination),
                  obj.helper.get_section_registry(section)])
 
-@cli.group(name='config', cls=hlp.OrderedGroup)
-def config_cli():
-    """Manage charts' configuration
-
-    This is a command line interface for manage charts' configuration
-    """
-
-@config_cli.command(name='view',
-                    help="View current charts' configuration")
+@cli.command(name='view',
+             help="View current charts' configuration")
 @click.pass_obj
 def config_view(obj):
     for section in obj.helper.get_charts():
         utils.print_chart_config(obj.config, section)
 
-@config_cli.command(name='set-registry',
-                    help='Set default registry for all charts in the configuration')
+@cli.command(name='set-registry',
+             help='Set default registry for all charts in the configuration')
 @click.pass_obj
 @click.argument('registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
 def config_set_registry(obj, registry):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
     utils.update_config(obj.config, obj.config_file)
 
-@config_cli.command(name='set',
-                    help='Add or update an chart section in the configuration')
+@cli.command(name='set',
+             help='Add or update an chart section in the configuration')
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
@@ -98,8 +91,8 @@ def config_set(obj, section, registry):
     obj.helper.validate_section(section)
     utils.update_config(obj.config, obj.config_file)
 
-@config_cli.command(name='unset',
-                    help='Remove an chart section in the configuration')
+@cli.command(name='unset',
+             help='Remove an chart section in the configuration')
 @click.pass_obj
 @click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
 def config_unset(obj, sections):
