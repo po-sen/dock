@@ -137,6 +137,11 @@ def mock_click_confirm(request, mocker):
     return mock
 
 @pytest.fixture(scope='function')
+def mock_click_echo(mocker):
+    mock = mocker.patch('click.echo')
+    return mock
+
+@pytest.fixture(scope='function')
 def mock_update_config(mocker):
     mock = mocker.patch('dock_cli.utils.utils.update_config')
     mock.return_value = mocker.MagicMock()
