@@ -1,6 +1,6 @@
 [project]
 name = "dock-cli"
-version = "1.2.0a0"
+version = "1.2.0"
 dependencies = [
   "click~=8.1.7",
 ]
