@@ -1,5 +1,4 @@
 import configparser
-import logging
 import click
 from dock_cli.utils import callback as cb
 from dock_cli.utils import commands as cmd
@@ -79,15 +78,13 @@ def config_set_registry(obj, registry):
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
-@click.option('--registry', required=False, type=str,
-              help='Name of the registry for this section.')
-def config_set(obj, section, registry):
+def config_set(obj, section):
+    if not obj.config.get(configparser.DEFAULTSECT, Chart.REGISTRY, fallback=''):
+        registry = click.prompt('Enter default registry for all charts',
+                                default='oci://registry-1.docker.io/namespace', type=str).strip()
+        utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
     utils.set_config_section(obj.config, section)
-    utils.set_config_option(obj.config, section, Chart.REGISTRY, registry)
     utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
-    if not obj.config.has_option(configparser.DEFAULTSECT, Chart.REGISTRY):
-        logging.getLogger(__name__).warning(
-            "Recommended to set the default registry with 'dock chart config set-registry' first.")
     obj.helper.validate_section(section)
     utils.update_config(obj.config, obj.config_file)
 

@@ -139,6 +139,13 @@ def mock_click_confirm(request, mocker):
 @pytest.fixture(scope='function')
 def mock_click_echo(mocker):
     mock = mocker.patch('click.echo')
+    mock.return_value = mocker.MagicMock()
+    return mock
+
+@pytest.fixture(scope='function')
+def mock_click_prompt(mocker):
+    mock = mocker.patch('click.prompt')
+    mock.return_value = 'namespace'
     return mock
 
 @pytest.fixture(scope='function')

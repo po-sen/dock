@@ -50,25 +50,22 @@ def test_chart_set_registry(dock, env, mock_update_config):
     mock_update_config.assert_called_once()
     assert output.splitlines()[0] == '  Set [DEFAULT] oci-registry = mew'
 
-def test_chart_set(dock, env, valid_chart_section, config_file, mock_update_config):
+def test_chart_set(dock, env, valid_chart_section, config_file, mock_click_prompt, mock_update_config):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / valid_chart_section.section)
     output = invoke_cli(dock, ['chart', 'set', path], env=env)
+    mock_click_prompt.assert_not_called()
     mock_update_config.assert_called_once()
     assert f'  Set [{valid_chart_section.section}] type = chart\n' in output
 
-def test_chart_set_without_config(dock, env_init, valid_chart_section, config_file, mock_update_config):
+def test_chart_set_without_config(dock, env_init, valid_chart_section, config_file,
+                                  mock_click_prompt, mock_update_config):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / valid_chart_section.section)
-    output = invoke_cli(dock, ['chart', 'set', path, '--registry=namespace'], env=env_init)
+    output = invoke_cli(dock, ['chart', 'set', path], env=env_init)
+    mock_click_prompt.assert_called_once()
     mock_update_config.assert_called_once()
     assert f'  Set [{valid_chart_section.section}] type = chart\n' in output
-    assert f'  Set [{valid_chart_section.section}] oci-registry = namespace\n' in output
-
-def test_chart_set_with_params(dock, env, valid_chart_section, config_file, mock_update_config):
-    path = str(config_file.parent / valid_chart_section.section)
-    output = invoke_cli(dock, ['chart', 'set', path, '--registry=namespace'], env=env)
-    mock_update_config.assert_called_once()
-    assert f'  Set [{valid_chart_section.section}] type = chart\n' in output
-    assert f'  Set [{valid_chart_section.section}] oci-registry = namespace\n' in output
 
 def test_chart_set_error(dock, env, invalid_chart_section, config_file, mock_update_config):
     path = str(config_file.parent / invalid_chart_section.section)

@@ -1,6 +1,5 @@
 import configparser
 import itertools
-import logging
 import click
 from dock_cli.utils import callback as cb
 from dock_cli.utils import commands as cmd
@@ -95,8 +94,6 @@ def config_set_registry(obj, registry):
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
-@click.option('--registry', required=False, type=str,
-              help='Name of the registry for this section.')
 @click.option('--image-file', required=False, type=str, default='Dockerfile', show_default=True,
               help='Name of the Dockerfile for this section.')
 @click.option('--image-name', required=False, type=str,
@@ -105,17 +102,16 @@ def config_set_registry(obj, registry):
               type=click.Path(exists=True),
               callback=cb.multiline_sections,
               help='List of sections or paths that this section depends on.')
-def config_set(obj, section, registry, image_file, image_name, depends_on):
-    # pylint: disable=too-many-arguments
+def config_set(obj, section, image_file, image_name, depends_on):
+    if not obj.config.get(configparser.DEFAULTSECT, Image.REGISTRY, fallback=''):
+        registry = click.prompt('Enter default registry for all images',
+                                default='namespace', type=str).strip()
+        utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
     utils.set_config_section(obj.config, section)
-    utils.set_config_option(obj.config, section, Image.REGISTRY, registry)
+    utils.set_config_option(obj.config, section, Image.TYPE, SectionType.IMAGE)
     utils.set_config_option(obj.config, section, Image.FILE, image_file)
     utils.set_config_option(obj.config, section, Image.NAME, image_name)
     utils.set_config_option(obj.config, section, Image.DEPENDS_ON, depends_on)
-    utils.set_config_option(obj.config, section, Image.TYPE, SectionType.IMAGE)
-    if not obj.config.has_option(configparser.DEFAULTSECT, Image.REGISTRY):
-        logging.getLogger(__name__).warning(
-            "Recommended to set the default registry with 'dock image config set-registry' first.")
     obj.helper.validate_section(section)
     utils.update_config(obj.config, obj.config_file)
 

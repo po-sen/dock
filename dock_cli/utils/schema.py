@@ -10,10 +10,10 @@ class ChartConfigOptions(str, enum.Enum):
 @enum.unique
 class ImageConfigOptions(str, enum.Enum):
     REGISTRY = 'registry'
+    TYPE = 'type'
     FILE = 'image-file'
     NAME = 'image-name'
     DEPENDS_ON = 'depends-on'
-    TYPE = 'type'
     def __str__(self):
         return self.value
 

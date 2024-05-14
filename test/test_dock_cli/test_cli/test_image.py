@@ -67,41 +67,50 @@ def test_image_set_registry(dock, env, mock_update_config):
     mock_update_config.assert_called_once()
     assert output.splitlines()[0] == '  Set [DEFAULT] registry = mew'
 
-def test_image_set(dock, env, valid_image_section, config_file, mock_update_config):
+def test_image_set(dock, env, valid_image_section, config_file,
+                   mock_click_prompt, mock_update_config):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / valid_image_section.section)
     output = invoke_cli(dock, ['image', 'set', path], env=env)
+    mock_click_prompt.assert_not_called()
     mock_update_config.assert_called_once()
     assert f'  Set [{valid_image_section.section}] type = image\n' in output
 
-def test_image_set_without_config_file(dock, env_init, valid_image_section, config_file, mock_update_config):
+def test_image_set_without_config(dock, env_init, valid_image_section, config_file,
+                                  mock_click_prompt, mock_update_config):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / valid_image_section.section)
-    output = invoke_cli(dock, ['image', 'set', path, '--registry=namespace'], env=env_init)
+    output = invoke_cli(dock, ['image', 'set', path], env=env_init)
+    mock_click_prompt.assert_called_once()
     mock_update_config.assert_called_once()
     assert f'  Set [{valid_image_section.section}] type = image\n' in output
-    assert f'  Set [{valid_image_section.section}] registry = namespace\n' in output
 
-def test_image_set_with_params_1(dock, env, valid_image_section, config_file, mock_update_config):
+def test_image_set_with_params_1(dock, env, valid_image_section, config_file,
+                                 mock_click_prompt, mock_update_config):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / valid_image_section.section)
     output = invoke_cli(dock, ['image', 'set', path,
                                f'--image-name={valid_image_section.name}',
                                f'--depends-on={config_file.parent}/images/image-1/'], env=env)
+    mock_click_prompt.assert_not_called()
     mock_update_config.assert_called_once()
     assert f'  Set [{valid_image_section.section}] type = image\n' in output
     assert f'  Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
     assert f'  Set [{valid_image_section.section}] depends-on = images/image-1\n' in output
 
-def test_image_set_with_params_2(dock, env, valid_image_section, config_file, mock_update_config):
+def test_image_set_with_params_2(dock, env, valid_image_section, config_file,
+                                 mock_click_prompt, mock_update_config):
+    # pylint: disable=too-many-arguments
     path = str(config_file.parent / valid_image_section.section)
     output = invoke_cli(dock, ['image', 'set', path,
                                '--image-file=Dockerfile',
-                               '--registry=namespace',
                                f'--image-name={valid_image_section.name}',
                                f'--depends-on={config_file.parent}/charts/chart-1',
                                f'--depends-on={config_file.parent}/dock.ini',
                                f'--depends-on={config_file.parent}/.'], env=env)
+    mock_click_prompt.assert_not_called()
     mock_update_config.assert_called_once()
     assert f'  Set [{valid_image_section.section}] type = image\n' in output
-    assert f'  Set [{valid_image_section.section}] registry = namespace\n' in output
     assert f'  Set [{valid_image_section.section}] image-file = Dockerfile\n' in output
     assert f'  Set [{valid_image_section.section}] image-name = {valid_image_section.name}\n' in output
     assert f'  Set [{valid_image_section.section}] depends-on = \ncharts/chart-1\ndock.ini\n.\n' in output
