@@ -38,60 +38,38 @@ Where `dock.ini` can be empty or nonexistent, you can use the following command 
 
 ```bash
 # Set default registry for all images
-$ dock image config set-registry posen
-Set [DEFAULT] registry = posen
+$ dock image set-registry posen -y
+  Set [DEFAULT] registry = posen
 
 # Set default registry for all charts
-$ dock chart config set-registry oci://registry-1.docker.io/posen
-Set [DEFAULT] oci-registry = oci://registry-1.docker.io/posen
+$ dock chart set-registry oci://registry-1.docker.io/posen -y
+  Set [DEFAULT] oci-registry = oci://registry-1.docker.io/posen
 
 # Add images/myFirstImage/ to the configuration
-$ dock image config set images/myFirstImage/
-Del [images/myFirstImage] registry
-Set [images/myFirstImage] image-file = Dockerfile
-Del [images/myFirstImage] image-name
-Del [images/myFirstImage] depends-on
-Set [images/myFirstImage] type = image
-
-images/myFirstImage:
-- registry: posen
-- image-file: Dockerfile
-- image-name:
-- depends-on:
-- type: image
+$ dock image set images/myFirstImage/ -y
+  Set [images/myFirstImage]
+  Set [images/myFirstImage] type = image
+  Set [images/myFirstImage] image-file = Dockerfile
+  Unset [images/myFirstImage] image-name
+  Unset [images/myFirstImage] depends-on
 
 # Add images/mySecondImage/ to the configuration
-$ dock image config set images/mySecondImage/ --depends-on=images/myFirstImage/
-Del [images/mySecondImage] registry
-Set [images/mySecondImage] image-file = Dockerfile
-Del [images/mySecondImage] image-name
-Set [images/mySecondImage] depends-on = images/myFirstImage
-Set [images/mySecondImage] type = image
-
-images/mySecondImage:
-- registry: posen
-- image-file: Dockerfile
-- image-name:
-- depends-on: images/myFirstImage
-- type: image
+$ dock image set images/mySecondImage/ --depends-on=images/myFirstImage/ -y
+  Set [images/mySecondImage]
+  Set [images/mySecondImage] type = image
+  Set [images/mySecondImage] image-file = Dockerfile
+  Unset [images/mySecondImage] image-name
+  Set [images/mySecondImage] depends-on = images/myFirstImage
 
 # Add charts/myFirstChart/ to the configuration
-$ dock chart config set charts/myFirstChart/
-Del [charts/myFirstChart] oci-registry
-Set [charts/myFirstChart] type = chart
-
-charts/myFirstChart:
-- oci-registry: oci://registry-1.docker.io/posen
-- type: chart
+$ dock chart set charts/myFirstChart/ -y
+  Set [charts/myFirstChart]
+  Set [charts/myFirstChart] type = chart
 
 # Add charts/mySecondChart/ to the configuration
-$ dock chart config set charts/mySecondChart/
-Del [charts/mySecondChart] oci-registry
-Set [charts/mySecondChart] type = chart
-
-charts/mySecondChart:
-- oci-registry: oci://registry-1.docker.io/posen
-- type: chart
+$ dock chart set charts/mySecondChart/ -y
+  Set [charts/mySecondChart]
+  Set [charts/mySecondChart] type = chart
 ```
 
 And the content of `dock.ini` is as follows:
@@ -103,13 +81,13 @@ registry = posen
 oci-registry = oci://registry-1.docker.io/posen
 
 [images/myFirstImage]
-image-file = Dockerfile
 type = image
+image-file = Dockerfile
 
 [images/mySecondImage]
+type = image
 image-file = Dockerfile
 depends-on = images/myFirstImage
-type = image
 
 [charts/myFirstChart]
 type = chart

@@ -69,16 +69,18 @@ def config_view(obj):
              help='Set default registry for all charts in the configuration')
 @click.pass_obj
 @click.argument('registry', required=False, type=str, default='oci://registry-1.docker.io/namespace')
-def config_set_registry(obj, registry):
+@click.option('-y', '--assume-yes', is_flag=True, default=False, help='Update config without a prompt')
+def config_set_registry(obj, registry, assume_yes):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Chart.REGISTRY, registry)
-    utils.update_config(obj.config, obj.config_file)
+    utils.update_config(obj.config, obj.config_file, assume_yes)
 
 @cli.command(name='set',
              help='Add or update an chart section in the configuration')
 @click.pass_obj
 @click.argument('section', required=True, type=click.Path(exists=True, file_okay=False),
                 callback=cb.transform_to_section)
-def config_set(obj, section):
+@click.option('-y', '--assume-yes', is_flag=True, default=False, help='Update config without a prompt')
+def config_set(obj, section, assume_yes):
     if not obj.config.get(configparser.DEFAULTSECT, Chart.REGISTRY, fallback=''):
         registry = click.prompt('Enter default registry for all charts',
                                 default='oci://registry-1.docker.io/namespace', type=str).strip()
@@ -86,14 +88,15 @@ def config_set(obj, section):
     utils.set_config_section(obj.config, section)
     utils.set_config_option(obj.config, section, Chart.TYPE, SectionType.CHART)
     obj.helper.validate_section(section)
-    utils.update_config(obj.config, obj.config_file)
+    utils.update_config(obj.config, obj.config_file, assume_yes)
 
 @cli.command(name='unset',
              help='Remove an chart section in the configuration')
 @click.pass_obj
 @click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
-def config_unset(obj, sections):
+@click.option('-y', '--assume-yes', is_flag=True, default=False, help='Update config without a prompt')
+def config_unset(obj, sections, assume_yes):
     # pylint: disable=duplicate-code
     for section in sections:
         utils.unset_config_section(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
+    utils.update_config(obj.config, obj.config_file, assume_yes)

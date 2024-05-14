@@ -3,12 +3,13 @@ import pathlib
 import click
 from dock_cli.utils.schema import ImageConfigOptions as Image, ChartConfigOptions as Chart
 
-def update_config(config, config_file):
-    if click.confirm('Do you want to update the configuration?'):
+def update_config(config, config_file, assume_yes=False):
+    if assume_yes or click.confirm('Do you want to update the configuration?'):
         logging.getLogger(__name__).debug('Updating configuration to %s', config_file)
         with open(config_file, 'w', encoding='utf-8') as fp:
             config.write(fp)
-        click.echo(click.style('  Successfully updated.', fg='green'))
+        if not assume_yes:
+            click.echo(click.style('  Successfully updated.', fg='green'))
     else:
         click.echo(click.style('  Cancel the update.', fg='yellow'))
 

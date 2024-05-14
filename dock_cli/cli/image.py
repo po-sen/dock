@@ -85,9 +85,10 @@ def config_view(obj):
              help='Set default registry for all images in the configuration')
 @click.pass_obj
 @click.argument('registry', required=False, type=str, default='namespace')
-def config_set_registry(obj, registry):
+@click.option('-y', '--assume-yes', is_flag=True, default=False, help='Update config without a prompt')
+def config_set_registry(obj, registry, assume_yes):
     utils.set_config_option(obj.config, configparser.DEFAULTSECT, Image.REGISTRY, registry)
-    utils.update_config(obj.config, obj.config_file)
+    utils.update_config(obj.config, obj.config_file, assume_yes)
 
 @cli.command(name='set',
              help='Add or update an image section in the configuration')
@@ -102,7 +103,9 @@ def config_set_registry(obj, registry):
               type=click.Path(exists=True),
               callback=cb.multiline_sections,
               help='List of sections or paths that this section depends on.')
-def config_set(obj, section, image_file, image_name, depends_on):
+@click.option('-y', '--assume-yes', is_flag=True, default=False, help='Update config without a prompt')
+def config_set(obj, section, image_file, image_name, depends_on, assume_yes):
+    # pylint: disable=too-many-arguments
     if not obj.config.get(configparser.DEFAULTSECT, Image.REGISTRY, fallback=''):
         registry = click.prompt('Enter default registry for all images',
                                 default='namespace', type=str).strip()
@@ -113,14 +116,15 @@ def config_set(obj, section, image_file, image_name, depends_on):
     utils.set_config_option(obj.config, section, Image.NAME, image_name)
     utils.set_config_option(obj.config, section, Image.DEPENDS_ON, depends_on)
     obj.helper.validate_section(section)
-    utils.update_config(obj.config, obj.config_file)
+    utils.update_config(obj.config, obj.config_file, assume_yes)
 
 @cli.command(name='unset',
              help='Remove an image section in the configuration')
 @click.pass_obj
 @click.argument('sections', nargs=-1, required=True, type=str, callback=cb.validate_section)
-def config_unset(obj, sections):
+@click.option('-y', '--assume-yes', is_flag=True, default=False, help='Update config without a prompt')
+def config_unset(obj, sections, assume_yes):
     # pylint: disable=duplicate-code
     for section in sections:
         utils.unset_config_section(obj.config, section)
-    utils.update_config(obj.config, obj.config_file)
+    utils.update_config(obj.config, obj.config_file, assume_yes)

@@ -15,6 +15,15 @@ def test_update_config(mocker, config_file, mock_config_open, mock_click_confirm
         mock_click_echo.assert_called_once_with(click.style('  Cancel the update.', fg='yellow'))
 
 
+def test_update_config_assume_yes(mocker, config_file, mock_config_open, mock_click_confirm, mock_click_echo):
+    mock_config = mocker.Mock()
+    update_config(mock_config, config_file, assume_yes=True)
+    mock_click_confirm.assert_not_called()
+    mock_config_open.assert_called_once_with(config_file, 'w', encoding='utf-8')
+    mock_config.write.assert_called_once()
+    mock_click_echo.assert_not_called()
+
+
 class TestTopologicalSort():
     def test_linear_dependencies(self):
         dependencies = {
