@@ -8,9 +8,9 @@ def update_config(config, config_file):
         logging.getLogger(__name__).debug('Updating configuration to %s', config_file)
         with open(config_file, 'w', encoding='utf-8') as fp:
             config.write(fp)
-        click.echo('  Successfully updated.')
+        click.echo(click.style('  Successfully updated.', fg='green'))
     else:
-        click.echo('  Cancel the update.')
+        click.echo(click.style('  Cancel the update.', fg='yellow'))
 
 def to_section(config_dir, value):
     section = pathlib.Path(value).resolve().relative_to(config_dir).as_posix()
@@ -25,7 +25,7 @@ def set_config_option(config, section, option, value=None):
         config.set(section, option, value)
         click.echo(f"  {click.style(f'Set [{section}] {option} = {value}', fg='green')}")
     else:
-        click.echo(f"  {click.style(f'Set [{section}] {option} = ', fg='red')}")
+        click.echo(f"  {click.style(f'Unset [{section}] {option}', fg='red')}")
         logging.getLogger(__name__).debug("Skipping section [%s] option '%s' because value was '%s'",
                                           section, option, value)
 
