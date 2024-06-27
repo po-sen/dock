@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: '3.10'
       - name: Initial dock-cli
-        run: make clean init list
+        run: make clean init
       - name: Create tag
         run: make create-tag
       - name: Push tag

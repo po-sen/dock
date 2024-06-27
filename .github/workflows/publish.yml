@@ -14,7 +14,7 @@ jobs:
         with:
           python-version: '3.10'
       - name: Initial dock-cli
-        run: make clean init list
+        run: make clean init
       - name: Build package
         run: make build-package
       - name: Upload package

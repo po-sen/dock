@@ -18,16 +18,12 @@ $(VENV):
 	$(PYTHON) -m venv $(VENV); \
 	$(VENV_PIP) install -Uq pip setuptools wheel; \
 	$(VENV_PIP) install -Uqe .[test]; \
+	$(VENV_PIP) list; \
 	echo -e "Successfully created a new virtualenv $(VENV) in $$PWD";
 
 .DEFAULT_GOAL: init
 .PHONY: init
 init: $(VENV)
-
-.PHONY: list
-list: init
-	@set -euo pipefail; \
-	$(VENV_PIP) list;
 
 .PHONY: test
 test: init

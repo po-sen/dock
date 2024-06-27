@@ -37,7 +37,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4.1.0
       - name: Initial dock-cli
-        run: make clean init list
+        run: make clean init
       - name: Test dock-cli
         run: make test
       - name: Clean dock-cli
