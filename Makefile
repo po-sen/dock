@@ -1,5 +1,4 @@
 SHELL := /bin/bash
-PHONY :=
 
 VENV := .venv
 DOCK_CLI := dock_cli
@@ -21,47 +20,46 @@ $(VENV):
 	$(VENV_PIP) install -Uqe .[test]; \
 	echo -e "Successfully created a new virtualenv $(VENV) in $$PWD";
 
-PHONY += init
+.DEFAULT_GOAL: init
+.PHONY: init
 init: $(VENV)
 
-PHONY += list
+.PHONY: list
 list: init
 	@set -euo pipefail; \
 	$(VENV_PIP) list;
 
-PHONY += test
+.PHONY: test
 test: init
 	@set -euo pipefail; \
 	$(VENV_PYLINT) $(DOCK_CLI); \
 	$(VENV_PYTEST);
 
-PHONY += clean
+.PHONY: clean
 clean:
 	@rm -rf $(VENV) $(EGG_INFO) $(DIST_DIR)
 
-PHONY += create-tag
+.PHONY: create-tag
 create-tag: init
 	@set -euo pipefail; \
 	dock_version=$$($(VENV_DOCK) --version); \
 	$(GIT) tag $$dock_version;
 
-PHONY += push-tag
+.PHONY: push-tag
 push-tag: init
 	@set -euo pipefail; \
 	dock_version=$$($(VENV_DOCK) --version); \
 	$(GIT) push origin $$dock_version;
 
-PHONY += build-package
+.PHONY: build-package
 build-package: init
 	@set -euo pipefail; \
 	$(VENV_PIP) install -Uq build; \
 	$(VENV_PYTHON) -m build --outdir $(DIST_DIR);
 
-PHONY += upload-package
+.PHONY: upload-package
 upload-package: init
 	@set -euo pipefail; \
 	$(VENV_PIP) install -Uq twine; \
 	$(VENV_PYTHON) -m twine check --strict $(DIST_DIR)/*; \
 	$(VENV_PYTHON) -m twine upload $(DIST_DIR)/*;
-
-.PHONY: $(PHONY)
